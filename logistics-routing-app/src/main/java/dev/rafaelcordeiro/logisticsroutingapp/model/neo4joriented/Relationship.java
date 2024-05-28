@@ -1,6 +1,7 @@
 package dev.rafaelcordeiro.logisticsroutingapp.model.neo4joriented;
 
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Neo4jTag;
+import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OpenStreetMapTag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
