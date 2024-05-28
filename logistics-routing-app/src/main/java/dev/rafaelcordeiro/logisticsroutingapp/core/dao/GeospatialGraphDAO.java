@@ -1,6 +1,7 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.dao;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.infra.BasicNeo4jConnection;
+import dev.rafaelcordeiro.logisticsroutingapp.core.util.Neo4jUtils;
 import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraph;
 import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraphNode;
 import dev.rafaelcordeiro.logisticsroutingapp.model.neo4joriented.Graph;
@@ -9,7 +10,6 @@ import dev.rafaelcordeiro.logisticsroutingapp.model.neo4joriented.Relationship;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import org.neo4j.driver.QueryConfig;
-import org.neo4j.driver.Value;
 import org.neo4j.driver.types.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,25 +21,6 @@ public class GeospatialGraphDAO {
     private static final Logger log = LoggerFactory.getLogger(GeospatialGraphDAO.class);
     private String nodesAndRelationsRecordsQuery = "MATCH (n1)-[r]->(n2) RETURN n1, r, n2";
     private String intersectionsAndSegmentsQuery = "MATCH (n1:INTERSECTION)-[r:ROAD_SEGMENT]->(n2:INTERSECTION) RETURN n1, r, n2";
-
-//    public class LogThread extends Thread {
-//        public Integer count = 0;
-//        public Integer total;
-//
-//        @Override
-//        public void run() {
-//            try {
-//                System.out.println(count + "/" + total);
-//                while (count < total) {
-//                    Thread.sleep(0);
-//                    System.out.println(count + "/" + total);
-//                }
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//    }
-//    private LogThread logThread;
 
     public BasicGraph fetchBasicGraph() {
         var result = BasicNeo4jConnection.getDriver()
@@ -90,20 +71,16 @@ public class GeospatialGraphDAO {
 
         var graph = new Graph();
 
-//        logThread = new LogThread();
-//        logThread.setName("LOG_THREAD");
-//        logThread.total = result.records().size();
-//        logThread.start();
         result.records().forEach(record -> {
             AtomicReference<Node<OSMIntersection, OSMRoadSegment>> startNode = new AtomicReference<>(new Node<>());
             Optional.ofNullable(graph.getNodes().get(record.get(0).get("osmid").asLong())).ifPresentOrElse(startNode::set, () -> {
                 var node = startNode.get();
                 node.setData(new OSMIntersection(
-                        ensureNullSafetyRecordValueExtraction(record.get(0).get("osmid"), Long.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(0).get("location"), Point.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(0).get("streetCount"), Integer.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(0).get("highway"), String.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(0).get("ref"), String.class)
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("osmid"), Long.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("location"), Point.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("streetCount"), Integer.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("highway"), String.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("ref"), String.class)
                 ));
                 startNode.set(node);
                 graph.getNodes().put(startNode.get().getData().getOsmid(), startNode.get());
@@ -113,56 +90,29 @@ public class GeospatialGraphDAO {
             Optional.ofNullable(graph.getNodes().get(record.get(2).get("osmid").asLong())).ifPresentOrElse(endNode::set, () -> {
                 var node = endNode.get();
                 node.setData(new OSMIntersection(
-                        ensureNullSafetyRecordValueExtraction(record.get(2).get("osmid"), Long.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(2).get("location"), Point.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(2).get("streetCount"), Integer.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(2).get("highway"), String.class),
-                        ensureNullSafetyRecordValueExtraction(record.get(2).get("ref"), String.class)
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(2).get("osmid"), Long.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(2).get("location"), Point.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(2).get("streetCount"), Integer.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(2).get("highway"), String.class),
+                        Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(2).get("ref"), String.class)
                 ));
                 endNode.set(node);
                 graph.getNodes().put(endNode.get().getData().getOsmid(), endNode.get());
             });
 
             var segmentData = new OSMRoadSegment(
-                    ensureNullSafetyRecordValueExtraction(record.get(1).get("osmid"), Long.class),
-                    ensureNullSafetyRecordValueExtraction(record.get(1).get("name"), String.class),
-                    ensureNullSafetyRecordValueExtraction(record.get(1).get("lanes"), String.class),
-                    ensureNullSafetyRecordValueExtraction(record.get(1).get("length"), Double.class),
-                    ensureNullSafetyRecordValueExtraction(record.get(1).get("highway"), String.class),
-                    ensureNullSafetyRecordValueExtraction(record.get(1).get("oneway"), Boolean.class),
-                    ensureNullSafetyRecordValueExtraction(record.get(1).get("ref"), String.class)
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("osmid"), Long.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("name"), String.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("lanes"), String.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("length"), Double.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("highway"), String.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("oneway"), Boolean.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("ref"), String.class)
             );
             var relationship = new Relationship<>(segmentData, startNode.get(), endNode.get());
             startNode.get().addAdjascentNode(endNode.get(), relationship);
-//            logThread.count++;
         });
         System.out.println(graph);
-    }
-
-    private <T> T ensureNullSafetyRecordValueExtraction(Value value, Class<T> tClass) {
-        try {
-            if (tClass == Integer.class) {
-                return (T) Integer.valueOf(value.asInt());
-            }
-            if (tClass == Long.class) {
-                return (T) Long.valueOf(value.asLong());
-            }
-            if (tClass == Float.class) {
-                return (T) Float.valueOf(value.asFloat());
-            }
-            if (tClass == Boolean.class) {
-                return (T) Boolean.valueOf(value.asBoolean());
-            }
-            if (tClass == String.class) {
-                return (T) value.asString();
-            }
-            if (tClass == Point.class) {
-                return (T) value.asPoint();
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
     }
 
 }
