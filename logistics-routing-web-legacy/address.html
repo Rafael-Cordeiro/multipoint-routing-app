@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenStreetMap Routing With Neo4j</title>
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <!-- CSS for leaflet and leaflet-geoman plugin -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+      integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
+      crossorigin=""
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
+    />
+    <!-- Load JavaScript for leaflet, leaflet-geoman plugin, turf.js, and neo4j-driver -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+      integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
+      crossorigin=""
+    ></script>
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    <script src="https://unpkg.com/neo4j-driver"></script>
+    <!-- Fixed size map area -->
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        /* .leaflet-container {
+              width: 1000px;
+              height: 1000px;
+            } */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 16px Arial;
+        }
+
+        .autocomplete {
+            /*the container must be positioned relative:*/
+            position: relative;
+            display: inline-block;
+        }
+
+        input {
+            border: 1px solid transparent;
+            background-color: #f1f1f1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        input[type="text"] {
+            background-color: #f1f1f1;
+            width: 100%;
+        }
+
+        input[type="submit"] {
+            background-color: DodgerBlue;
+            color: #fff;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 999;
+            /*position the autocomplete items to be the same width as the container:*/
+            top: 100%;
+            left: 0;
+            right: 0;
+        }
+
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+        }
+
+        .autocomplete-items div:hover {
+            /*when hovering an item:*/
+            background-color: #e9e9e9;
+        }
+
+        .autocomplete-active {
+            /*when navigating through the items using the arrow keys:*/
+            background-color: DodgerBlue !important;
+            color: #ffffff;
+        }
+
+        #loading {
+            visibility: collapse;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="" method="post">
+        <div class="autocomplete" style="width: 300px">
+            <input type="text" id="source" name="source" placeholder="From">
+            <input type="text" id="dest" name="dest" placeholder="To">
+        </div>
+        <input type="submit" value="Route" id="routeButton">
+    </form>
+
+    <div id="loading">Loading...</div>
+
+    <div id="map" style="width: 100%; height: 90vh"></div>
+    <script>
+        const NEO4J_URI = 'neo4j://localhost:7999'
+        const NEO4J_USER = 'neo4j'
+        const NEO4J_PASSWORD = 'password'
+        var driver = neo4j.driver(
+            NEO4J_URI,
+            neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD)
+        )
+
+        var route = []
+
+        function autocomplete(input) {
+            var currentFocus
+            input.addEventListener('input', (event) => {
+                var autocompleteItems, autocompleteItemsChild, val = input.value
+                closeAllLists()
+
+                if (!val) return false
+                if (val.length < 4) return false
+
+                currentFocus = -1
+
+                autocompleteItems = document.createElement('div')
+                autocompleteItems.setAttribute('id', input.id + 'autocomplete-list')
+                autocompleteItems.setAttribute('class', 'autocomplete-items')
+                input.parentNode.appendChild(autocompleteItems)
+
+                var session = driver.session()
+
+                session.run(`
+                    CALL db.index.fulltext.queryNodes("search_index", $searchString)
+                    YIELD node, score
+                    RETURN coalesce(node.name, node.full_address) AS value, score, labels(node)[0] AS label, node.id AS id
+                    ORDER BY score DESC LIMIT 25`
+                    , { searchString: input.value }
+
+                ).then((result) => {
+                    result.records.forEach((record) => {
+                        const address = record.get('value')
+                        const nodeId = record.get('id')
+
+                        autocompleteItemsChild = document.createElement('div')
+                        autocompleteItemsChild.innerHTML = address
+                        autocompleteItemsChild.dataset.id = nodeId
+
+                        autocompleteItemsChild.innerHTML += `<input data-id="${nodeId}" type="hidden" value="${address}">`
+                        autocompleteItemsChild.addEventListener('click', (event) => {
+                            let inputElem = autocompleteItemsChild.getElementsByTagName('input')[0]
+                            input.value = inputElem.value
+                            input.dataset.id = inputElem.dataset.id
+                            closeAllLists()
+                        })
+                        autocompleteItems.appendChild(autocompleteItemsChild)
+                    })
+                })
+            })
+
+            input.addEventListener('keydown', (event) => {
+                var autocompleteItems = document.getElementById(this.id + 'autocomplete-list')
+                if (autocompleteItems) autocompleteItems = autocompleteItems.getElementsByTagName('div')
+                if (event.keyCode == 40) {
+                    /*If the arrow DOWN key is pressed,
+                increase the currentFocus variable:*/
+                    currentFocus++
+                    /*and and make the current item more visible:*/
+                    addActive(autocompleteItems)
+                } else if (event.keyCode == 38) {
+                    //up
+                    /*If the arrow UP key is pressed,
+                decrease the currentFocus variable:*/
+                    currentFocus--
+                    /*and and make the current item more visible:*/
+                    addActive(autocompleteItems)
+                } else if (event.keyCode == 13) {
+                    /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                    event.preventDefault()
+                    if (currentFocus > -1) {
+                        /*and simulate a click on the 'active' item:*/
+                        if (autocompleteItems) autocompleteItems[currentFocus].click()
+                    }
+                }
+            })
+
+            function addActive(autocompleteItems) {
+                /*a function to classify an item as 'active':*/
+                if (!autocompleteItems) return false
+                /*start by removing the 'active' class on all items:*/
+                removeActive(autocompleteItems)
+                if (currentFocus >= autocompleteItems.length) currentFocus = 0
+                if (currentFocus < 0) currentFocus = autocompleteItems.length - 1
+                /*add class 'autocomplete-active':*/
+                autocompleteItems[currentFocus].classList.add('autocomplete-active')
+            }
+            function removeActive(autocompleteItems) {
+                /*a function to remove the 'active' class from all autocomplete items:*/
+                autocompleteItems.forEach((item) => {
+                    item.classList.remove('autocomplete-active')
+                })
+            }
+
+            // close all autocomplete lists in the document, except the one passed as an argument
+            function closeAllLists(element) {
+                /*close all autocomplete lists in the document,
+          except the one passed as an argument:*/
+                var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+                for (var i = 0; i < autocompleteItems.length; i++) {
+                    if (element != autocompleteItems[i] && element != input) {
+                        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+                    }
+                }
+            }
+        }
+        autocomplete(document.getElementById('source'))
+        autocomplete(document.getElementById('dest'))
+
+        document.getElementById('routeButton').addEventListener('click', (e) => {
+            e.preventDefault()
+            const loadingDiv = document.getElementById('loading')
+            loadingDiv.style.visibility = 'visible'
+            getRoute({
+                //source: document.getElementById("source").value,
+                source: document.getElementById('source').dataset.id,
+                dest: document.getElementById('dest').dataset.id
+                //dest: document.getElementById("dest").value,
+            });
+            loadingDiv.style.visibility = 'collapse'
+        })
+    </script>
+
+    <script>
+        const map = L.map('map', { zoomControl: false }).setView([-23.550164, -46.633664], 13)
+        L.control.zoom({ position: 'bottomright' }).addTo(map)
+        L.tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                maxZoom: 19,
+                attribution:
+                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            }
+        ).addTo(map)
+
+        const popup = L.popup()
+        var route = []
+
+        const getRoute = ({ source, dest }) => {
+            var session = driver.session({
+                database: NEO4J_USER,
+                defaultAccessMode: neo4j.session.read
+            })
+
+            const routeQuery = `
+                MATCH (to {id: $dest})-[:NEAREST_INTERSECTION]->(source:INTERSECTION) 
+                MATCH (from {id: $source})-[:NEAREST_INTERSECTION]->(target:INTERSECTION)
+                CALL apoc.algo.dijkstra(source, target, 'ROAD_SEGMENT', 'length')
+                YIELD path, weight
+                RETURN [n in nodes(path) | [n.location.latitude, n.location.longitude]] AS route
+            `
+            session.run(routeQuery, { source, dest })
+                .then((routeResult) => {
+                    routeResult.records.forEach((routeRecord) => {
+                        const routeCoords = routeRecord.get('route')
+                        var polyline = L.polyline(routeCoords)
+                            .setStyle({ color: 'blue', weight: 7 })
+                            .addTo(map)
+
+                        console.log(routeCoords[0])
+                        console.log(routeCoords[routeCoords.length - 1])
+
+                        var corner1 = L.latLng(routeCoords[0][0], routeCoords[0][1])
+                        var corner2 = L.latLng(routeCoords[routeCoords.length - 1][0], routeCoords[routeCoords.length - 1][1])
+
+                        L.marker(corner1).addTo(map)
+                        L.marker(corner2).addTo(map)
+
+                        bounds = L.latLongBounds(corner1, corner2)
+                        map.panInsideBounds(bounds)
+                    })
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+                .then(() => {
+                    route = []
+                    session.close()
+                })
+        }
+    </script>
+</body>
+
+</html>
