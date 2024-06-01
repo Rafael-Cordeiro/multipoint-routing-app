@@ -21,6 +21,7 @@ public class GeospatialGraphDAO {
     private static final Logger log = LoggerFactory.getLogger(GeospatialGraphDAO.class);
     private String nodesAndRelationsRecordsQuery = "MATCH (n1)-[r]->(n2) RETURN n1, r, n2";
     private String intersectionsAndSegmentsQuery = "MATCH (n1:INTERSECTION)-[r:ROAD_SEGMENT]->(n2:INTERSECTION) RETURN n1, r, n2";
+    private String nearestIntersectionQuery      = "MATCH (addressId {id: \"041143051700\"})-[:NEAREST_INTERSECTION]->(target:INTERSECTION) RETURN target";
 
     public BasicGraph fetchBasicGraph() {
         var result = BasicNeo4jConnection.getDriver()
@@ -63,7 +64,7 @@ public class GeospatialGraphDAO {
         return basicGraph;
     }
 
-    public void testGeoGraphQuery() {
+    public Graph getFullGeoGraph() {
         var result = BasicNeo4jConnection.getDriver()
                 .executableQuery(intersectionsAndSegmentsQuery)
                 .withConfig(QueryConfig.builder().withDatabase("neo4j").build())
@@ -112,7 +113,28 @@ public class GeospatialGraphDAO {
             var relationship = new Relationship<>(segmentData, startNode.get(), endNode.get());
             startNode.get().addAdjascentNode(endNode.get(), relationship);
         });
-        System.out.println(graph);
+        return graph;
+    }
+
+    public Node<OSMIntersection, OSMRoadSegment> getNearestIntersection(String id) {
+        var result = BasicNeo4jConnection.getDriver()
+                .executableQuery(nearestIntersectionQuery)
+                .withConfig(QueryConfig.builder().withDatabase("neo4j").build())
+                .execute();
+
+        AtomicReference<Node<OSMIntersection, OSMRoadSegment>> target = new AtomicReference<>(new Node<>());
+        result.records().forEach(record -> {
+            var node = target.get();
+            node.setData(new OSMIntersection(
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("osmid"), Long.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("location"), Point.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("streetCount"), Integer.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("highway"), String.class),
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("ref"), String.class)
+            ));
+            target.set(node);
+        });
+        return target.get();
     }
 
 }
