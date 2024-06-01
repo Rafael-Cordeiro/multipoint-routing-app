@@ -15,6 +15,9 @@ public class Neo4jUtils {
             if (tClass == Float.class) {
                 return (T) Float.valueOf(value.asFloat());
             }
+            if (tClass == Double.class) {
+                return (T) Double.valueOf(value.asDouble());
+            }
             if (tClass == Boolean.class) {
                 return (T) Boolean.valueOf(value.asBoolean());
             }
