@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-public class Dijkstra {
+public class LegacyDijkstra {
     
     public BasicGraph run(BasicGraph incomingGraph, BasicGraphNode source) {
         Long start = System.currentTimeMillis();

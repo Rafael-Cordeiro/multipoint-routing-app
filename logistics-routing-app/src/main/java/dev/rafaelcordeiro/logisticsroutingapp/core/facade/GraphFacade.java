@@ -1,6 +1,6 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.facade;
 
-import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.Dijkstra;
+import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.LegacyDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.SingleDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.dao.GeospatialGraphDAO;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
@@ -25,7 +25,7 @@ public class GraphFacade {
     }
 
     public BasicGraph runDijkstra(BasicGraph graph, BasicGraphNode sourceNode) {
-        Dijkstra dijkstra = new Dijkstra();
+        LegacyDijkstra dijkstra = new LegacyDijkstra();
         return dijkstra.run(graph, sourceNode);
     }
 
