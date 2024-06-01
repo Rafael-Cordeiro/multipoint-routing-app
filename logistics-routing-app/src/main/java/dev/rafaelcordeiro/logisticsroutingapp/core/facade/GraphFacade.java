@@ -12,7 +12,7 @@ public class GraphFacade {
         geospatialGraphDAO = new GeospatialGraphDAO();
     }
 
-    public BasicGraph fetchBasicraph() {
+    public BasicGraph fetchBasicGraph() {
         return geospatialGraphDAO.fetchBasicGraph();
     }
 

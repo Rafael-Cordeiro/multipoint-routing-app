@@ -12,7 +12,7 @@ public class GraphController {
     }
 
     public void runDijkstra() {
-        BasicGraph graph = graphFacade.fetchBasicraph();
+        BasicGraph graph = graphFacade.fetchBasicGraph();
         var sourceNode = graph.getNodes().stream().findFirst();
         if (sourceNode.isPresent()) {
             BasicGraph returnedGraph = graphFacade.runDijkstra(graph, sourceNode.get());
