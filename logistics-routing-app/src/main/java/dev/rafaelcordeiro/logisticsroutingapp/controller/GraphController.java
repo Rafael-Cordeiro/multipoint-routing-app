@@ -1,8 +1,8 @@
 package dev.rafaelcordeiro.logisticsroutingapp.controller;
 
-import dev.rafaelcordeiro.logisticsroutingapp.core.GraphFacade;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraph;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraphNode;
+import dev.rafaelcordeiro.logisticsroutingapp.core.facade.GraphFacade;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphNode;
 
 public class GraphController {
     private GraphFacade graphFacade;

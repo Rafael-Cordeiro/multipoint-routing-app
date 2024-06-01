@@ -2,11 +2,11 @@ package dev.rafaelcordeiro.logisticsroutingapp.core.dao;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.infra.BasicNeo4jConnection;
 import dev.rafaelcordeiro.logisticsroutingapp.core.util.Neo4jUtils;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraph;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraphNode;
-import dev.rafaelcordeiro.logisticsroutingapp.model.neo4joriented.Graph;
-import dev.rafaelcordeiro.logisticsroutingapp.model.neo4joriented.Node;
-import dev.rafaelcordeiro.logisticsroutingapp.model.neo4joriented.Relationship;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphNode;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Graph;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Relationship;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import org.neo4j.driver.QueryConfig;

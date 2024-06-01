@@ -1,4 +1,4 @@
-package dev.rafaelcordeiro.logisticsroutingapp.core;
+package dev.rafaelcordeiro.logisticsroutingapp.core.facade;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.Dijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.dao.GeospatialGraphDAO;

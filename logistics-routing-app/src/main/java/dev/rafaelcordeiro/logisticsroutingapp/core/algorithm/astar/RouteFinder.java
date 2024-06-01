@@ -1,7 +1,7 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.astar;
 
-import dev.rafaelcordeiro.logisticsroutingapp.model.bettergraph.Graph;
-import dev.rafaelcordeiro.logisticsroutingapp.model.bettergraph.GraphNode;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.bettergraph.Graph;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.bettergraph.GraphNode;
 import lombok.AllArgsConstructor;
 
 import java.util.List;

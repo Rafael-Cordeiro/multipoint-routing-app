@@ -1,8 +1,8 @@
 package dev.rafaelcordeiro.logisticsroutingapp.executables;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.infra.BasicNeo4jConnection;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraph;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraphNode;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphNode;
 import org.neo4j.driver.QueryConfig;
 
 public class TestLoadBasicGraphNeo4jData {
