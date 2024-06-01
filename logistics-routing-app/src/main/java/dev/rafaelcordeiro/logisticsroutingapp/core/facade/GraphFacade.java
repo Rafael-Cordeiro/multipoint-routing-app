@@ -2,8 +2,8 @@ package dev.rafaelcordeiro.logisticsroutingapp.core;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.Dijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.dao.GeospatialGraphDAO;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraph;
-import dev.rafaelcordeiro.logisticsroutingapp.model.basicgraph.BasicGraphNode;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
+import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphNode;
 
 public class GraphFacade {
     private GeospatialGraphDAO geospatialGraphDAO;

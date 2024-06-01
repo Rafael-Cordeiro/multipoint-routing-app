@@ -1,5 +1,6 @@
 <template>
   <q-page class="q-pl-xl q-pr-xl">
+    multipoint
     <q-form
       class="autocomplete row justify-around items-center"
       @submit.prevent="handleSubmit"
@@ -13,6 +14,7 @@
           @filter="(val, update) => filterHandler(val, update, 'source')"
           behavior="dialog"
         />
+        {{ search.source.attributes }}
         <q-select
           v-model="search.destination.attributes"
           use-input
@@ -21,6 +23,7 @@
           @filter="(val, update) => filterHandler(val, update, 'destination')"
           behavior="dialog"
         />
+        {{ search.destination.attributes }}
       </div>
       <div class="col-3">
         <q-btn color="teal" type="submit" label="Route" :loading="submitting">
