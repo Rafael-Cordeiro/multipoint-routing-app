@@ -8,12 +8,13 @@ import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphN
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+@Slf4j
 @Service
 public class GraphFacade {
+
     private GeospatialGraphDAO geospatialGraphDAO;
 
     public GraphFacade() {
@@ -33,13 +34,17 @@ public class GraphFacade {
         geospatialGraphDAO.getFullGeoGraph();
     }
 
-    public List<Node<OSMIntersection, OSMRoadSegment>> getRoute(String source, String destination) {
-        var sourceNode = geospatialGraphDAO.getNearestIntersection(source);
-        var destinationNode = geospatialGraphDAO.getNearestIntersection(destination);
+    public Node<OSMIntersection, OSMRoadSegment> getRoute(String sourceId, String targetId) {
+        log.info("Gerando rota para os endereços de ID {} e {}", sourceId, targetId);
+        var sourceNode = geospatialGraphDAO.getNearestIntersection(sourceId);
+        var targetNode = geospatialGraphDAO.getNearestIntersection(targetId);
         var graph = geospatialGraphDAO.getFullGeoGraph();
         SingleDijkstra dijkstra = new SingleDijkstra();
-        dijkstra.run(graph, graph.getNodes().get(sourceNode.getData().getOsmid()));
-        return List.of(sourceNode, destinationNode);
+        dijkstra.run(graph, graph.getNodes().get(sourceNode.getData().getOsmid()), graph.getNodes().get(targetNode.getData().getOsmid()));
+        log.info("Retornando caminho curto do nó alvo");
+        var returningNode = graph.getNodes().get(targetNode.getData().getOsmid());
+        returningNode.getShortestPath().add(returningNode);
+        return returningNode;
     }
 
 }
