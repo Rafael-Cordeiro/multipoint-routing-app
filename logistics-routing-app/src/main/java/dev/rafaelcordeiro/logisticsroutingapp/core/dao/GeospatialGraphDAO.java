@@ -9,19 +9,18 @@ import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Relationship;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
+import lombok.extern.slf4j.Slf4j;
 import org.neo4j.driver.QueryConfig;
 import org.neo4j.driver.types.Point;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 public class GeospatialGraphDAO {
-    private static final Logger log = LoggerFactory.getLogger(GeospatialGraphDAO.class);
     private String nodesAndRelationsRecordsQuery = "MATCH (n1)-[r]->(n2) RETURN n1, r, n2";
     private String intersectionsAndSegmentsQuery = "MATCH (n1:INTERSECTION)-[r:ROAD_SEGMENT]->(n2:INTERSECTION) RETURN n1, r, n2";
-    private String nearestIntersectionQuery      = "MATCH (addressId {id: \"041143051700\"})-[:NEAREST_INTERSECTION]->(target:INTERSECTION) RETURN target";
+//    private String nearestIntersectionQuery      = "MATCH (address)-[:NEAREST_INTERSECTION]->(target:INTERSECTION)\nWHERE address.id = $code\nRETURN target";
 
     public BasicGraph fetchBasicGraph() {
         var result = BasicNeo4jConnection.getDriver()
@@ -65,11 +64,16 @@ public class GeospatialGraphDAO {
     }
 
     public Graph getFullGeoGraph() {
+        log.info("Iniciando busca do grafo completo no banco de dados...");
+        Long millis = System.currentTimeMillis();
         var result = BasicNeo4jConnection.getDriver()
                 .executableQuery(intersectionsAndSegmentsQuery)
                 .withConfig(QueryConfig.builder().withDatabase("neo4j").build())
                 .execute();
+        log.info("Consulta finalizada em {} ms", System.currentTimeMillis() - millis);
 
+        log.info("Montando grafo em objeto...");
+        millis = System.currentTimeMillis();
         var graph = new Graph();
 
         result.records().forEach(record -> {
@@ -113,12 +117,15 @@ public class GeospatialGraphDAO {
             var relationship = new Relationship<>(segmentData, startNode.get(), endNode.get());
             startNode.get().addAdjascentNode(endNode.get(), relationship);
         });
+        log.info("Grafo montado em {} ms", System.currentTimeMillis() - millis);
         return graph;
     }
 
     public Node<OSMIntersection, OSMRoadSegment> getNearestIntersection(String id) {
+        log.info("Buscando intersecção mais próxima do endereço com ID {}", id);
+        Long millis = System.currentTimeMillis();
         var result = BasicNeo4jConnection.getDriver()
-                .executableQuery(nearestIntersectionQuery)
+                .executableQuery("MATCH (address {id: " + id + "})-[:NEAREST_INTERSECTION]->(target:INTERSECTION)\nRETURN target LIMIT 1")
                 .withConfig(QueryConfig.builder().withDatabase("neo4j").build())
                 .execute();
 
@@ -134,6 +141,7 @@ public class GeospatialGraphDAO {
             ));
             target.set(node);
         });
+        log.info("Intersecção buscada em {} ms", System.currentTimeMillis() - millis);
         return target.get();
     }
 
