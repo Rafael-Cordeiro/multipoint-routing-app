@@ -16,6 +16,7 @@
     "@geoman-io/leaflet-geoman-free": "^2.16.0",
     "@quasar/extras": "^1.16.4",
     "@turf/turf": "^6.5.0",
+    "axios": "^1.7.2",
     "leaflet": "^1.9.4",
     "neo4j-driver": "^5.20.0",
     "quasar": "^2.8.0",
