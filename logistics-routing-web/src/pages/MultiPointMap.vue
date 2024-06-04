@@ -14,7 +14,6 @@
           @filter="(val, update) => filterHandler(val, update, 'source')"
           behavior="dialog"
         />
-        {{ search.source.attributes }}
         <q-select
           v-model="search.destination.attributes"
           use-input
@@ -23,7 +22,6 @@
           @filter="(val, update) => filterHandler(val, update, 'destination')"
           behavior="dialog"
         />
-        {{ search.destination.attributes }}
       </div>
       <div class="col-3">
         <q-btn color="teal" type="submit" label="Route" :loading="submitting">
@@ -44,6 +42,7 @@
 <script setup>
 import neo4j from "neo4j-driver";
 import L from "leaflet";
+import axios from "axios";
 
 defineOptions({
   name: "LegacyMap",
@@ -133,41 +132,28 @@ defineOptions({
         dest: this.search.destination.attributes.id,
       });
     },
-    fetchRoute({ source, dest: dest }) {
-      var session = this.driver.session({
-        database: this.NEO4J_USER,
-        defaultAccessMode: neo4j.session.read,
-      });
-      session
-        .run(this.ROUTE_QUERY, { source, dest })
-        .then((routeResult) => {
-          // console.log(routeResult)
-          routeResult.records.forEach((routeRecord) => {
-            const routeCoords = routeRecord.get("route");
-            console.log(routeCoords)
-            var polyline = L.polyline(routeCoords)
-              .setStyle({ color: "blue", weight: 7 })
-              .addTo(this.map);
+    async fetchRoute({ source, dest }) {
+      const response = await axios
+        .get(
+          `http://localhost:8080/routing?sourceId="${source}"&targetId="${dest}"`
+        )
+        .catch((error) => console.error(`[Error from axios]: ${error}`));
+      const routeCoords = response.data;
+      var polyline = L.polyline(routeCoords)
+        .setStyle({ color: "blue", weight: 7 })
+        .addTo(this.map);
 
-            var corner1 = L.latLng(routeCoords[0][0], routeCoords[0][1]);
-            var corner2 = L.latLng(
-              routeCoords[routeCoords.length - 1][0],
-              routeCoords[routeCoords.length - 1][1]
-            );
+      var corner1 = L.latLng(routeCoords[0][0], routeCoords[0][1]);
+      var corner2 = L.latLng(
+        routeCoords[routeCoords.length - 1][0],
+        routeCoords[routeCoords.length - 1][1]
+      );
 
-            L.marker(corner1).addTo(this.map);
-            L.marker(corner2).addTo(this.map);
+      L.marker(corner1).addTo(this.map);
+      L.marker(corner2).addTo(this.map);
 
-            this.map.panInsideBounds(L.latLngBounds(corner1, corner2));
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-        })
-        .then(() => {
-          session.close();
-          this.submitting = false;
-        });
+      this.map.panInsideBounds(L.latLngBounds(corner1, corner2));
+      this.submitting = false;
     },
   },
 });
