@@ -1,7 +1,6 @@
 package dev.rafaelcordeiro.logisticsroutingapp.controller;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.facade.GraphFacade;
-import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Graph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,7 +21,8 @@ public class RoutingController {
     GraphFacade graphFacade;
 
     @GetMapping
-    public @ResponseBody ResponseEntity<List> testGet(@RequestParam String sourceId, @RequestParam String destinationId) {
-        return ResponseEntity.ok(graphFacade.getRoute(sourceId, destinationId));
+    public @ResponseBody ResponseEntity<Object> testGet(@RequestParam String sourceId, @RequestParam String targetId) {
+        var response = graphFacade.getRoute(sourceId, targetId).getShortestPath().stream().map(node -> List.of(node.getData().getLocation().y(), node.getData().getLocation().x())).toList();
+        return ResponseEntity.ok(response);
     }
 }
