@@ -5,23 +5,25 @@ import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Relationship;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 public class SingleDijkstra {
 
-    public Graph run(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source) {
+    public Graph run(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source, Node<OSMIntersection, OSMRoadSegment> target) {
+        log.info("Executando Dijkstra de dois pontos com os nós de ID {} e {}", source.getData().getOsmid(), target.getData().getOsmid());
         Long start = System.currentTimeMillis();
-        Graph returnedGraph = calculateShortestPathFromSource(incomingGraph, source);
-        Long end = System.currentTimeMillis();
-        System.out.println("Algoritmo executou em: " + (end - start) + " milissegundos");
+        Graph returnedGraph = calculateShortestPathFromSource(incomingGraph, source, target);
+        log.info("Algoritmo executou em: {} ms", System.currentTimeMillis() - start);
         return returnedGraph;
     }
 
-    private Graph calculateShortestPathFromSource(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source) {
+    private Graph calculateShortestPathFromSource(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source, Node<OSMIntersection, OSMRoadSegment> target) {
         source.setDijkstraDistance(0.0);
 
         Set<Node<OSMIntersection, OSMRoadSegment>> settledNodes = new HashSet<>();
