@@ -130,7 +130,7 @@ defineOptions({
         dest: this.search.destination.attributes.id,
       });
     },
-    fetchRoute({ source, dest: dest }) {
+    fetchRoute({ source, dest }) {
       var session = this.driver.session({
         database: this.NEO4J_USER,
         defaultAccessMode: neo4j.session.read,
@@ -138,10 +138,8 @@ defineOptions({
       session
         .run(this.ROUTE_QUERY, { source, dest })
         .then((routeResult) => {
-          // console.log(routeResult)
           routeResult.records.forEach((routeRecord) => {
             const routeCoords = routeRecord.get("route");
-            console.log(routeCoords)
             var polyline = L.polyline(routeCoords)
               .setStyle({ color: "blue", weight: 7 })
               .addTo(this.map);
