@@ -4,7 +4,7 @@ const routes = [
     component: () => import("layouts/CleanLayout.vue"),
     children: [
       { path: "", component: () => import("pages/LegacyMap.vue") },
-      { path: "/multipoint", component: () => import("pages/MultiPointMap.vue") },
+      { path: "/simplerouting", component: () => import("src/pages/SimpleRoutingMap.vue") },
     ],
   },
 
