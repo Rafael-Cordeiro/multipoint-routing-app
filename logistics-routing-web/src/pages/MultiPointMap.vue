@@ -64,12 +64,6 @@ defineOptions({
         YIELD node, score
         RETURN coalesce(node.name, node.full_address) AS value, score, labels(node)[0] AS label, node.id AS id
         ORDER BY score DESC LIMIT 25`,
-      ROUTE_QUERY: `
-        MATCH (to {id: $dest})-[:NEAREST_INTERSECTION]->(source:INTERSECTION)
-        MATCH (from {id: $source})-[:NEAREST_INTERSECTION]->(target:INTERSECTION)
-        CALL apoc.algo.dijkstra(source, target, 'ROAD_SEGMENT', 'length')
-        YIELD path, weight
-        RETURN [n in nodes(path) | [n.location.latitude, n.location.longitude]] AS route`,
       driver: {},
       map: {},
       route: {
