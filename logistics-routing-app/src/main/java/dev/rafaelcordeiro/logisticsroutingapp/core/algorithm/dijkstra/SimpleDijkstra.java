@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-public class SingleDijkstra {
+public class SimpleDijkstra {
 
     public Graph run(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source, Node<OSMIntersection, OSMRoadSegment> target) {
         log.info("Executando Dijkstra de dois pontos com os nós de OSMID {} e {}", source.getData().getOsmid(), target.getData().getOsmid());

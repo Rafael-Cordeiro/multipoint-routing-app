@@ -1,7 +1,7 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.facade;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.LegacyDijkstra;
-import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.SingleDijkstra;
+import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.SimpleDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.dao.GeospatialGraphDAO;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphNode;
@@ -41,7 +41,7 @@ public class GraphFacade {
         var sourceNode = geospatialGraphDAO.getNearestIntersection(sourceId);
         var targetNode = geospatialGraphDAO.getNearestIntersection(targetId);
         var graph = geospatialGraphDAO.getFullGeoGraph();
-        SingleDijkstra dijkstra = new SingleDijkstra();
+        SimpleDijkstra dijkstra = new SimpleDijkstra();
         dijkstra.run(graph, graph.getNodes().get(sourceNode.getData().getOsmid()), graph.getNodes().get(targetNode.getData().getOsmid()));
         var returningNode = graph.getNodes().get(targetNode.getData().getOsmid());
         returningNode.getShortestPath().add(returningNode);
