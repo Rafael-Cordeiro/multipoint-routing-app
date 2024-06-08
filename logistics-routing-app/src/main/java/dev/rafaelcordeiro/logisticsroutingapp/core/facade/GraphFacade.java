@@ -35,15 +35,18 @@ public class GraphFacade {
     }
 
     public Node<OSMIntersection, OSMRoadSegment> getRoute(String sourceId, String targetId) {
+        log.info("\n\n\n========================================================================\n\n\n");
         log.info("Gerando rota para os endereços de ID {} e {}", sourceId, targetId);
+        var millis = System.currentTimeMillis();
         var sourceNode = geospatialGraphDAO.getNearestIntersection(sourceId);
         var targetNode = geospatialGraphDAO.getNearestIntersection(targetId);
         var graph = geospatialGraphDAO.getFullGeoGraph();
         SingleDijkstra dijkstra = new SingleDijkstra();
         dijkstra.run(graph, graph.getNodes().get(sourceNode.getData().getOsmid()), graph.getNodes().get(targetNode.getData().getOsmid()));
-        log.info("Retornando caminho curto do nó alvo");
         var returningNode = graph.getNodes().get(targetNode.getData().getOsmid());
         returningNode.getShortestPath().add(returningNode);
+        graph = null;
+        log.info("Operação comcluída em {} ms", System.currentTimeMillis() - millis);
         return returningNode;
     }
 
