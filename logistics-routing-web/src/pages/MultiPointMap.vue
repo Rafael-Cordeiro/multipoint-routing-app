@@ -143,6 +143,7 @@ defineOptions({
       });
     },
     async fetchRoute({ source, dest }) {
+      const millis = Date.now()
       const response = await axios
         .get(
           `http://localhost:8080/routing?sourceId="${source}"&targetId="${dest}"`
@@ -164,6 +165,7 @@ defineOptions({
 
       this.map.panInsideBounds(L.latLngBounds(corner1, corner2));
       this.submitting = false;
+      console.log(`Consulta de rota e montagem de mapa executou em ${Date.now() - millis} ms`)
     },
     clearData() {
       this.search = {

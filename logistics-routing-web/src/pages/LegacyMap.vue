@@ -131,6 +131,7 @@ defineOptions({
       });
     },
     fetchRoute({ source, dest }) {
+      const millis = Date.now()
       var session = this.driver.session({
         database: this.NEO4J_USER,
         defaultAccessMode: neo4j.session.read,
@@ -162,6 +163,7 @@ defineOptions({
         .then(() => {
           session.close();
           this.submitting = false;
+          console.log(`Consulta de rota e montagem de mapa executou em ${Date.now() - millis} ms`)
         });
     },
   },
