@@ -3,8 +3,8 @@ const routes = [
     path: "",
     component: () => import("layouts/CleanLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/LegacyMap.vue") },
-      { path: "/simplerouting", component: () => import("src/pages/SimpleRoutingMap.vue") },
+      { path: "", component: () => import("pages/LegacyMap.vue"), meta: { title: "Legacy" } },
+      { path: "/simplerouting", component: () => import("src/pages/SimpleRoutingMap.vue"), meta: { title: "Simple Routing" } },
     ],
   },
 

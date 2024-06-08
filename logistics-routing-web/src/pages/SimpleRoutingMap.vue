@@ -1,6 +1,5 @@
 <template>
   <q-page class="q-pl-xl q-pr-xl">
-    multipoint
     <q-form
       class="autocomplete row justify-around items-center"
       @submit.prevent="handleSubmit"
