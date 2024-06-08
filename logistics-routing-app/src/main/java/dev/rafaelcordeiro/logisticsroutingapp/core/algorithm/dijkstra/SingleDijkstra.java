@@ -16,7 +16,7 @@ import java.util.Set;
 public class SingleDijkstra {
 
     public Graph run(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source, Node<OSMIntersection, OSMRoadSegment> target) {
-        log.info("Executando Dijkstra de dois pontos com os nós de ID {} e {}", source.getData().getOsmid(), target.getData().getOsmid());
+        log.info("Executando Dijkstra de dois pontos com os nós de OSMID {} e {}", source.getData().getOsmid(), target.getData().getOsmid());
         Long start = System.currentTimeMillis();
         Graph returnedGraph = calculateShortestPathFromSource(incomingGraph, source, target);
         log.info("Algoritmo executou em: {} ms", System.currentTimeMillis() - start);
@@ -28,10 +28,11 @@ public class SingleDijkstra {
 
         Set<Node<OSMIntersection, OSMRoadSegment>> settledNodes = new HashSet<>();
         Set<Node<OSMIntersection, OSMRoadSegment>> unsettledNodes = new HashSet<>();
+        boolean destinationNodeFound = false;
 
         unsettledNodes.add(source);
 
-        while (unsettledNodes.size() != 0) {
+        while (unsettledNodes.size() != 0 || !destinationNodeFound) {
             Node<OSMIntersection, OSMRoadSegment> currentNode = getLowestDistanceNode(unsettledNodes);
             unsettledNodes.remove(currentNode);
             for (Map.Entry<Node<OSMIntersection, OSMRoadSegment>, Relationship<OSMRoadSegment>> adjacencyPair : currentNode.getAdjascentNodes().entrySet()) {
@@ -40,6 +41,10 @@ public class SingleDijkstra {
                 if (!settledNodes.contains(adjacentNode)) {
                     calculateMinimumDistance(adjacentNode, edgeWeight, currentNode);
                     unsettledNodes.add(adjacentNode);
+                    if (adjacentNode.getData().getOsmid().equals(target.getData().getOsmid())) {
+                        destinationNodeFound = true;
+                        break;
+                    }
                 }
             }
             settledNodes.add(currentNode);
