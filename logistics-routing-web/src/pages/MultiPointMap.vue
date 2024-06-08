@@ -5,7 +5,7 @@
       class="autocomplete row justify-around items-center"
       @submit.prevent="handleSubmit"
     >
-      <div class="col-3">
+      <div class="col-4">
         <q-select
           v-model="search.source.attributes"
           use-input
@@ -23,12 +23,20 @@
           behavior="dialog"
         />
       </div>
-      <div class="col-3">
-        <q-btn color="teal" type="submit" label="Route" :loading="submitting">
-          <template v-slot:loading>
-            <q-spinner-facebook />
-          </template>
-        </q-btn>
+      <div class="col-1">
+        <div class="column">
+          <q-btn
+            color="primary"
+            type="submit"
+            label="Route"
+            :loading="submitting"
+          >
+            <template v-slot:loading>
+              <q-spinner-facebook />
+            </template>
+          </q-btn>
+          <q-btn @click="clearData">Clear</q-btn>
+        </div>
       </div>
     </q-form>
     <div
@@ -64,6 +72,11 @@ defineOptions({
         RETURN [n in nodes(path) | [n.location.latitude, n.location.longitude]] AS route`,
       driver: {},
       map: {},
+      route: {
+        startMarker: {},
+        endMarker: {},
+        polyline: [],
+      },
       submitting: false,
       search: {
         source: {
@@ -88,10 +101,7 @@ defineOptions({
       this.NEO4J_URI,
       neo4j.auth.basic(this.NEO4J_USER, this.NEO4J_PASSWORD)
     );
-    this.map = L.map("map", { zoomControl: false }).setView(
-      [-23.550164, -46.633664],
-      13
-    );
+    this.reloadMap();
     L.control.zoom({ position: "bottomright" }).addTo(this.map);
     L.tiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -139,7 +149,7 @@ defineOptions({
         )
         .catch((error) => console.error(`[Error from axios]: ${error}`));
       const routeCoords = response.data;
-      var polyline = L.polyline(routeCoords)
+      this.route.polyline = L.polyline(routeCoords)
         .setStyle({ color: "blue", weight: 7 })
         .addTo(this.map);
 
@@ -149,11 +159,41 @@ defineOptions({
         routeCoords[routeCoords.length - 1][1]
       );
 
-      L.marker(corner1).addTo(this.map);
-      L.marker(corner2).addTo(this.map);
+      this.route.startMarker = L.marker(corner1).addTo(this.map);
+      this.route.endMarker = L.marker(corner2).addTo(this.map);
 
       this.map.panInsideBounds(L.latLngBounds(corner1, corner2));
       this.submitting = false;
+    },
+    clearData() {
+      this.search = {
+        source: {
+          options: [],
+          attributes: {
+            name: "",
+            id: "",
+          },
+        },
+        destination: {
+          options: [],
+          attributes: {
+            name: "",
+            id: "",
+          },
+        },
+      };
+      this.map.eachLayer((layer) => {
+        layer === this.route.polyline && this.map.removeLayer(layer);
+        layer === this.route.startMarker && this.map.removeLayer(layer);
+        layer === this.route.endMarker && this.map.removeLayer(layer);
+      });
+    },
+    reloadMap() {
+      this.map = {};
+      this.map = L.map("map", { zoomControl: false }).setView(
+        [-23.550164, -46.633664],
+        13
+      );
     },
   },
 });
