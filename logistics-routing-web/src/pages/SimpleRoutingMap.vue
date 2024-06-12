@@ -5,21 +5,13 @@
       @submit.prevent="handleSubmit"
     >
       <div class="col-4">
-        <q-select
-          v-model="search.source.attributes"
-          use-input
+        <SelectAddress
+          :address="search.source"
           :options="search.source.options"
-          :option-label="(item) => (item === null ? '' : item.name)"
-          @filter="(val, update) => filterHandler(val, update, 'source')"
-          behavior="dialog"
         />
-        <q-select
-          v-model="search.destination.attributes"
-          use-input
+        <SelectAddress
+          :address="search.destination"
           :options="search.destination.options"
-          :option-label="(item) => (item === null ? '' : item.name)"
-          @filter="(val, update) => filterHandler(val, update, 'destination')"
-          behavior="dialog"
         />
       </div>
       <div class="col-1">
@@ -50,9 +42,13 @@
 import neo4j from "neo4j-driver";
 import L from "leaflet";
 import axios from "axios";
+import SelectAddress from "src/components/SelectAddress.vue";
 
 defineOptions({
   name: "LegacyMap",
+  components: {
+    SelectAddress
+  },
   data() {
     return {
       NEO4J_URI: "neo4j://localhost:7999",

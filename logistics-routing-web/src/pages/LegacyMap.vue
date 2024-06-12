@@ -5,21 +5,13 @@
       @submit.prevent="handleSubmit"
     >
       <div class="col-3">
-        <q-select
-          v-model="search.source.attributes"
-          use-input
+        <SelectAddress
+          :address="search.source"
           :options="search.source.options"
-          :option-label="(item) => (item === null ? '' : item.name)"
-          @filter="(val, update) => filterHandler(val, update, 'source')"
-          behavior="dialog"
         />
-        <q-select
-          v-model="search.destination.attributes"
-          use-input
+        <SelectAddress
+          :address="search.destination"
           :options="search.destination.options"
-          :option-label="(item) => (item === null ? '' : item.name)"
-          @filter="(val, update) => filterHandler(val, update, 'destination')"
-          behavior="dialog"
         />
       </div>
       <div class="col-3">
@@ -41,9 +33,13 @@
 <script setup>
 import neo4j from "neo4j-driver";
 import L from "leaflet";
+import SelectAddress from "src/components/SelectAddress.vue";
 
 defineOptions({
   name: "LegacyMap",
+  components: {
+    SelectAddress,
+  },
   data() {
     return {
       NEO4J_URI: "neo4j://localhost:7999",
@@ -131,7 +127,7 @@ defineOptions({
       });
     },
     fetchRoute({ source, dest }) {
-      const millis = Date.now()
+      const millis = Date.now();
       var session = this.driver.session({
         database: this.NEO4J_USER,
         defaultAccessMode: neo4j.session.read,
@@ -163,7 +159,11 @@ defineOptions({
         .then(() => {
           session.close();
           this.submitting = false;
-          console.log(`Consulta de rota e montagem de mapa executou em ${Date.now() - millis} ms`)
+          console.log(
+            `Consulta de rota e montagem de mapa executou em ${
+              Date.now() - millis
+            } ms`
+          );
         });
     },
   },
