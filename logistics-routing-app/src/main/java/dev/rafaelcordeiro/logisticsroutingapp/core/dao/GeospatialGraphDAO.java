@@ -125,7 +125,7 @@ public class GeospatialGraphDAO {
         log.info("Buscando intersecção mais próxima do endereço com ID {}", id);
         Long millis = System.currentTimeMillis();
         var result = BasicNeo4jConnection.getDriver()
-                .executableQuery("MATCH (address:ADDRESS {id: " + id + "})-[:NEAREST_INTERSECTION]->(target:INTERSECTION)\nRETURN target LIMIT 1")
+                .executableQuery("MATCH (address:ADDRESS {id: \"" + id + "\"})-[:NEAREST_INTERSECTION]->(target:INTERSECTION)\nRETURN target LIMIT 1")
                 .withConfig(QueryConfig.builder().withDatabase("neo4j").build())
                 .execute();
 

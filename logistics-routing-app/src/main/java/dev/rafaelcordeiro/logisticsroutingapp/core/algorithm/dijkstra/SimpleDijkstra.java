@@ -41,7 +41,7 @@ public class SimpleDijkstra {
 
         unsettledNodes.add(source);
 
-        while (!unsettledNodes.isEmpty() || !destinationNodeFound) {
+        while (!unsettledNodes.isEmpty() && !destinationNodeFound) {
             Node<OSMIntersection, OSMRoadSegment> currentNode = getLowestDistanceNode(unsettledNodes);
             unsettledNodes.remove(currentNode);
             for (Map.Entry<Node<OSMIntersection, OSMRoadSegment>, Relationship<OSMRoadSegment>> adjacencyPair : currentNode.getAdjascentNodes().entrySet()) {

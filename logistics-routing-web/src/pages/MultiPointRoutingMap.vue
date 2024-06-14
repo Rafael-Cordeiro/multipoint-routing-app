@@ -18,7 +18,9 @@
         </div>
         <div class="column items-center">
           <q-btn
-            v-bind:class="(addresses.intermediates.length > 0) ? 'q-ml-xl q-ma-sm' : 'q-ma-sm'"
+            v-bind:class="
+              addresses.intermediates.length > 0 ? 'q-ml-xl q-ma-sm' : 'q-ma-sm'
+            "
             round
             icon="add"
             :size="'md'"
@@ -118,31 +120,58 @@ defineOptions({
       this.submitting = true;
       this.fetchRoute({
         source: this.addresses.source.attributes.id,
-        dest: this.addresses.destination.attributes.id,
+        intermediates: this.addresses.intermediates.map(
+          (it) => it.attributes.id
+        ),
+        destination: this.addresses.destination.attributes.id,
       });
     },
-    async fetchRoute({ source, dest }) {
+    async fetchRoute(body) {
       const millis = Date.now();
       const response = await axios
-        .get(
-          `http://localhost:8080/routing?sourceId="${source}"&targetId="${dest}"`
-        )
+        .post("http://localhost:8080/routing", body)
         .catch((error) => console.error(`[Error from axios]: ${error}`));
-      const routeCoords = response.data;
-      this.route.polyline = L.polyline(routeCoords)
-        .setStyle({ color: "blue", weight: 7 })
-        .addTo(this.map);
+      const multipointRoute = response.data;
 
-      var corner1 = L.latLng(routeCoords[0][0], routeCoords[0][1]);
-      var corner2 = L.latLng(
-        routeCoords[routeCoords.length - 1][0],
-        routeCoords[routeCoords.length - 1][1]
-      );
+      var marker1 = L.marker(L.latLng(
+        multipointRoute.source.location.y,
+        multipointRoute.source.location.x
+      )).addTo(this.map);
+      var marker2 = null;
 
-      this.route.startMarker = L.marker(corner1).addTo(this.map);
-      this.route.endMarker = L.marker(corner2).addTo(this.map);
+      console.log(JSON.stringify(multipointRoute))
 
-      this.map.panInsideBounds(L.latLngBounds(corner1, corner2));
+      multipointRoute.paths.forEach((path) => {
+        if (path.left.osmid == multipointRoute.destination.osmid) {
+          marker2 = L.marker(
+            L.latLng(path.left.location.y, path.left.location.x)
+          ).addTo(this.map);
+        } else {
+          L.marker(L.latLng(path.left.location.y, path.left.location.x)).addTo(this.map);
+        }
+        L.polyline(
+          path.right.map((item) => {
+            return [item.y, item.x];
+          })
+        )
+          .setStyle({ color: "blue", weight: 7 })
+          .addTo(this.map);
+      });
+
+      // this.route.polyline = L.polyline(multipointRoute)
+      //   .setStyle({ color: "blue", weight: 7 })
+      //   .addTo(this.map);
+
+      // var corner1 = L.latLng(multipointRoute[0][0], multipointRoute[0][1]);
+      // var corner2 = L.latLng(
+      //   multipointRoute[multipointRoute.length - 1][0],
+      //   multipointRoute[multipointRoute.length - 1][1]
+      // );
+
+      this.route.startMarker = L.marker(marker1).addTo(this.map);
+      this.route.endMarker = L.marker(marker2).addTo(this.map);
+
+      this.map.panInsideBounds(L.latLngBounds(marker1, marker2));
       this.submitting = false;
       console.log(
         `Consulta de rota e montagem de mapa executou em ${

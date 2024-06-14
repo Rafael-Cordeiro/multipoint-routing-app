@@ -7,12 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.LinkedList;
-import java.util.List;
 
 @Getter
 @Setter
 public class DijkstraData {
-    private List<Node<OSMIntersection, OSMRoadSegment>> shortestPath;
+    private LinkedList<Node<OSMIntersection, OSMRoadSegment>> shortestPath;
     private Double dijkstraDistance;
 
     public DijkstraData() {
