@@ -21,8 +21,8 @@ public class RoutingController {
     GraphFacade graphFacade;
 
     @GetMapping
-    public @ResponseBody ResponseEntity<Object> testGet(@RequestParam String sourceId, @RequestParam String targetId) {
-        var response = graphFacade.getRoute(sourceId, targetId).getShortestPath().stream().map(node -> List.of(node.getData().getLocation().y(), node.getData().getLocation().x())).toList();
+    public @ResponseBody ResponseEntity<List<List<Double>>> calculateSimpleRoute(@RequestParam String sourceId, @RequestParam String targetId) {
+        var response = graphFacade.calculateSimpleRoute(sourceId, targetId);
         return ResponseEntity.ok(response);
     }
 }

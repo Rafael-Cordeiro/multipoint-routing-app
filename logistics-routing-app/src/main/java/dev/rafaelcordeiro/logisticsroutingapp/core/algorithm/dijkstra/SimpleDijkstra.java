@@ -7,24 +7,33 @@ import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 public class SimpleDijkstra {
 
-    public Graph run(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source, Node<OSMIntersection, OSMRoadSegment> target) {
+    private Map<Node<OSMIntersection, OSMRoadSegment>, DijkstraData> dijkstraDataMap = new HashMap<>();
+
+    public List<List<Double>> run(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source, Node<OSMIntersection, OSMRoadSegment> target) {
         log.info("Executando Dijkstra de dois pontos com os nós de OSMID {} e {}", source.getData().getOsmid(), target.getData().getOsmid());
         Long start = System.currentTimeMillis();
-        Graph returnedGraph = calculateShortestPathFromSource(incomingGraph, source, target);
+        incomingGraph.getNodes().forEach((key, value) -> dijkstraDataMap.put(value, new DijkstraData()));
+        calculateShortestPathFromSource(incomingGraph, source, target);
+        dijkstraDataMap.get(target).getShortestPath().add(target);
         log.info("Algoritmo executou em: {} ms", System.currentTimeMillis() - start);
-        return returnedGraph;
+        return dijkstraDataMap.get(target).getShortestPath().stream()
+                .map(node ->
+                        List.of(node.getData().getLocation().y(), node.getData().getLocation().x())
+                ).toList();
     }
 
     private Graph calculateShortestPathFromSource(Graph incomingGraph, Node<OSMIntersection, OSMRoadSegment> source, Node<OSMIntersection, OSMRoadSegment> target) {
-        source.setDijkstraDistance(0.0);
+        dijkstraDataMap.get(source).setDijkstraDistance(0.0);
 
         Set<Node<OSMIntersection, OSMRoadSegment>> settledNodes = new HashSet<>();
         Set<Node<OSMIntersection, OSMRoadSegment>> unsettledNodes = new HashSet<>();
@@ -32,7 +41,7 @@ public class SimpleDijkstra {
 
         unsettledNodes.add(source);
 
-        while (unsettledNodes.size() != 0 || !destinationNodeFound) {
+        while (!unsettledNodes.isEmpty() || !destinationNodeFound) {
             Node<OSMIntersection, OSMRoadSegment> currentNode = getLowestDistanceNode(unsettledNodes);
             unsettledNodes.remove(currentNode);
             for (Map.Entry<Node<OSMIntersection, OSMRoadSegment>, Relationship<OSMRoadSegment>> adjacencyPair : currentNode.getAdjascentNodes().entrySet()) {
@@ -56,7 +65,7 @@ public class SimpleDijkstra {
         Node<OSMIntersection, OSMRoadSegment> lowestDistanceNode = null;
         Double lowestDistance = Double.POSITIVE_INFINITY;
         for (Node<OSMIntersection, OSMRoadSegment> node : unsettledNodes) {
-            Double nodeDistance = node.getDijkstraDistance();
+            Double nodeDistance = dijkstraDataMap.get(node).getDijkstraDistance();
             if (nodeDistance < lowestDistance) {
                 lowestDistance = nodeDistance;
                 lowestDistanceNode = node;
@@ -66,12 +75,12 @@ public class SimpleDijkstra {
     }
 
     private void calculateMinimumDistance(Node<OSMIntersection, OSMRoadSegment> evaluationNode, Double edgeWeight, Node<OSMIntersection, OSMRoadSegment> sourceNode) {
-        Double sourceDistance = sourceNode.getDijkstraDistance();
-        if (sourceDistance + edgeWeight < evaluationNode.getDijkstraDistance()) {
-            evaluationNode.setDijkstraDistance(sourceDistance + edgeWeight);
-            LinkedList<Node<OSMIntersection, OSMRoadSegment>> shortestPath = new LinkedList<>(sourceNode.getShortestPath());
+        Double sourceDistance = dijkstraDataMap.get(sourceNode).getDijkstraDistance();
+        if (sourceDistance + edgeWeight < dijkstraDataMap.get(evaluationNode).getDijkstraDistance()) {
+            dijkstraDataMap.get(evaluationNode).setDijkstraDistance(sourceDistance + edgeWeight);
+            LinkedList<Node<OSMIntersection, OSMRoadSegment>> shortestPath = new LinkedList<>(dijkstraDataMap.get(sourceNode).getShortestPath());
             shortestPath.add(sourceNode);
-            evaluationNode.setShortestPath(shortestPath);
+            dijkstraDataMap.get(evaluationNode).setShortestPath(shortestPath);
         }
     }
 

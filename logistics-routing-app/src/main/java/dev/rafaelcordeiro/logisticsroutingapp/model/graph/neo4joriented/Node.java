@@ -14,8 +14,6 @@ import java.util.Map;
 public class Node<N extends Neo4jTag, R extends Neo4jTag> {
     private N data;
     private Map<Node<N, R>, Relationship<R>> adjascentNodes;
-    private List<Node<N, R>> shortestPath = new LinkedList<>();
-    private Double dijkstraDistance = Double.POSITIVE_INFINITY;
 
     public Node() {
         adjascentNodes = new HashMap<>();
