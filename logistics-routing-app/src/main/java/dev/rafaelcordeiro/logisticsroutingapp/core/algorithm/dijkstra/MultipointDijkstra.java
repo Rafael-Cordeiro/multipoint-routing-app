@@ -59,19 +59,20 @@ public class MultipointDijkstra {
         var opt = dijkstraDataMap.entrySet().stream().filter(entry ->
                                 intermediates.contains(entry.getKey()))
                 .min(Comparator.comparingDouble(entries -> entries.getValue().getDijkstraDistance()));
+
+//      Prepara nova chamada recursiva se ainda houver nó intermediário
         if (opt.isPresent()) {
             var nextNode = opt.get().getKey();
             var data = opt.get().getValue();
             multipointRoute.getPaths().put(nextNode, data.getShortestPath());
 
-            // quando o nó mais próximo for o nó destino, a recursão acaba e o algoritmo encerra
-            if (!nextNode.equals(destination)) {
-                var nextIntermediates = new ArrayList<>(intermediates);
-                nextIntermediates.remove(nextNode);
+            var nextIntermediates = new ArrayList<>(intermediates);
+            nextIntermediates.remove(nextNode);
 
-                iterateThroughNodes(multipointRoute, graph, nextNode, nextIntermediates, destination);
-            }
+            dijkstraDataMap.get(nextNode).getShortestPath().add(nextNode);
+            iterateThroughNodes(multipointRoute, graph, nextNode, nextIntermediates, destination);
         } else {
+            dijkstraDataMap.get(destination).getShortestPath().add(destination);
             multipointRoute.getPaths().put(destination, dijkstraDataMap.get(destination).getShortestPath());
         }
     }
@@ -107,7 +108,6 @@ public class MultipointDijkstra {
             }
             settledNodes.add(currentNode);
         }
-        dijkstraDataMap.get(destination).getShortestPath().add(destination);
     }
 
     private Node<OSMIntersection, OSMRoadSegment> getLowestDistanceNode(Set<Node<OSMIntersection, OSMRoadSegment>> unsettledNodes) {

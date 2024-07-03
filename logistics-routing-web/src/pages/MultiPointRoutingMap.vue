@@ -133,13 +133,13 @@ defineOptions({
         .catch((error) => console.error(`[Error from axios]: ${error}`));
       const multipointRoute = response.data;
 
-      var marker1 = L.marker(L.latLng(
-        multipointRoute.source.location.y,
-        multipointRoute.source.location.x
-      )).addTo(this.map);
+      var marker1 = L.marker(
+        L.latLng(
+          multipointRoute.source.location.y,
+          multipointRoute.source.location.x
+        )
+      ).addTo(this.map);
       var marker2 = null;
-
-      console.log(JSON.stringify(multipointRoute))
 
       multipointRoute.paths.forEach((path) => {
         if (path.left.osmid == multipointRoute.destination.osmid) {
@@ -147,7 +147,9 @@ defineOptions({
             L.latLng(path.left.location.y, path.left.location.x)
           ).addTo(this.map);
         } else {
-          L.marker(L.latLng(path.left.location.y, path.left.location.x)).addTo(this.map);
+          L.marker(L.latLng(path.left.location.y, path.left.location.x)).addTo(
+            this.map
+          );
         }
         L.polyline(
           path.right.map((item) => {
@@ -158,20 +160,10 @@ defineOptions({
           .addTo(this.map);
       });
 
-      // this.route.polyline = L.polyline(multipointRoute)
-      //   .setStyle({ color: "blue", weight: 7 })
-      //   .addTo(this.map);
+      this.route.startMarker = marker1;
+      this.route.endMarker = marker2;
 
-      // var corner1 = L.latLng(multipointRoute[0][0], multipointRoute[0][1]);
-      // var corner2 = L.latLng(
-      //   multipointRoute[multipointRoute.length - 1][0],
-      //   multipointRoute[multipointRoute.length - 1][1]
-      // );
-
-      this.route.startMarker = L.marker(marker1).addTo(this.map);
-      this.route.endMarker = L.marker(marker2).addTo(this.map);
-
-      this.map.panInsideBounds(L.latLngBounds(marker1, marker2));
+      // this.map.panInsideBounds(L.latLngBounds(marker1, marker2));
       this.submitting = false;
       console.log(
         `Consulta de rota e montagem de mapa executou em ${

@@ -28,6 +28,8 @@ public class RoutingController {
 
     @GetMapping
     public @ResponseBody ResponseEntity<List<List<Double>>> calculateSimpleRoute(@RequestParam String sourceId, @RequestParam String targetId) {
+        sourceId = sourceId.replace("\"", "");
+        targetId = targetId.replace("\"", "");
         var response = graphFacade.calculateSimpleRoute(sourceId, targetId);
         return ResponseEntity.ok(response);
     }

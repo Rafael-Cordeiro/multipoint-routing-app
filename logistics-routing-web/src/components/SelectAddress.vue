@@ -11,7 +11,6 @@
     behavior="dialog"
     class="q-ma-xs"
   />
-  {{ internalAddress.attributes }}
 </template>
 <script>
 import neo4j from "neo4j-driver";
