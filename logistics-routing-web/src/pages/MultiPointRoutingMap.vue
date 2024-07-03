@@ -151,12 +151,8 @@ defineOptions({
             this.map
           );
         }
-        L.polyline(
-          path.right.map((item) => {
-            return [item.y, item.x];
-          })
-        )
-          .setStyle({ color: "blue", weight: 7 })
+        L.polyline(path.right.map((item) => [item.y, item.x]))
+          .setStyle({ color: this.getRandomColor(), weight: 7 })
           .addTo(this.map);
       });
 
@@ -208,6 +204,14 @@ defineOptions({
           id: "",
         },
       });
+    },
+    getRandomColor() {
+      var letters = "0123456789ABCDEF";
+      var color = "#";
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
     },
   },
 });
