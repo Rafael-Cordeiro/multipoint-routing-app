@@ -1,6 +1,0 @@
-python3 -m venv .venv
-pip install osmnx
-pip install matplotlib
-pip install neo4j
-pip install jupyterlab
-jupyter lab
