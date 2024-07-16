@@ -1,5 +1,7 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra;
 
+import dev.rafaelcordeiro.logisticsroutingapp.core.util.Pair;
+import dev.rafaelcordeiro.logisticsroutingapp.model.api.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.MultipointRoute;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Graph;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
@@ -21,16 +23,24 @@ import java.util.Set;
 public class MultipointDijkstra {
 
     private Map<Node<OSMIntersection, OSMRoadSegment>, DijkstraData> dijkstraDataMap = new HashMap<>();
+    private Map<Node<OSMIntersection, OSMRoadSegment>, Address> addressToNodes;
 
-    public MultipointRoute run(Graph graph, Node<OSMIntersection, OSMRoadSegment> source,
-                               List<Node<OSMIntersection, OSMRoadSegment>> intermediates,
-                               Node<OSMIntersection, OSMRoadSegment> destination) {
+    public MultipointDijkstra(Map<Node<OSMIntersection, OSMRoadSegment>, Address> addressToNodes) {
+        this.addressToNodes = addressToNodes;
+    }
+
+    public MultipointRoute<OSMIntersection, OSMRoadSegment> run(
+            Graph graph,
+            Node<OSMIntersection, OSMRoadSegment> source,
+            List<Node<OSMIntersection, OSMRoadSegment>> intermediates,
+            Node<OSMIntersection, OSMRoadSegment> destination) {
         log.info("Executando Dijkstra de dois pontos com os nós de OSMID {} e {}", source.getData().getOsmid(), destination.getData().getOsmid());
         Long start = System.currentTimeMillis();
 
+//        TODO: Ajustar ordem de preenchimento de caminhos
         var multipointRoute = new MultipointRoute<OSMIntersection, OSMRoadSegment>();
-        multipointRoute.setSource(source);
-        multipointRoute.setDestination(destination);
+        multipointRoute.setSource(Pair.of(addressToNodes.get(source), source));
+        multipointRoute.setDestination(Pair.of(addressToNodes.get(destination), destination));
         iterateThroughNodes(multipointRoute, graph, source, intermediates, destination);
 
         log.info("Algoritmo executou em: {} ms", System.currentTimeMillis() - start);
@@ -39,6 +49,7 @@ public class MultipointDijkstra {
 
     /**
      * Função recursiva para montar caminho mínimo multiponto
+     *
      * @param multipointRoute
      * @param graph
      * @param source
@@ -57,23 +68,25 @@ public class MultipointDijkstra {
         calculateShortestPathFromSource(source, intermediates, destination);
 
         var opt = dijkstraDataMap.entrySet().stream().filter(entry ->
-                                intermediates.contains(entry.getKey()))
+                        intermediates.contains(entry.getKey()))
                 .min(Comparator.comparingDouble(entries -> entries.getValue().getDijkstraDistance()));
 
 //      Prepara nova chamada recursiva se ainda houver nó intermediário
         if (opt.isPresent()) {
             var nextNode = opt.get().getKey();
             var data = opt.get().getValue();
-            multipointRoute.getPaths().put(nextNode, data.getShortestPath());
 
             var nextIntermediates = new ArrayList<>(intermediates);
             nextIntermediates.remove(nextNode);
 
             dijkstraDataMap.get(nextNode).getShortestPath().add(nextNode);
+            multipointRoute.getPaths().put(nextNode, Pair.of(addressToNodes.get(nextNode), data.getShortestPath()));
             iterateThroughNodes(multipointRoute, graph, nextNode, nextIntermediates, destination);
         } else {
             dijkstraDataMap.get(destination).getShortestPath().add(destination);
-            multipointRoute.getPaths().put(destination, dijkstraDataMap.get(destination).getShortestPath());
+            multipointRoute.getPaths().put(
+                    destination,
+                    Pair.of(addressToNodes.get(destination), dijkstraDataMap.get(destination).getShortestPath()));
         }
     }
 

@@ -5,6 +5,7 @@ import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.LegacyDijk
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.MultipointDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.SimpleDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.dao.GeospatialGraphDAO;
+import dev.rafaelcordeiro.logisticsroutingapp.model.api.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.MultipointRoute;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.RouteRequest;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
@@ -15,7 +16,10 @@ import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -60,13 +64,33 @@ public class GraphFacade {
         var millis = System.currentTimeMillis();
 
         final var graph = geospatialGraphDAO.getFullGeoGraph();
-        Node<OSMIntersection, OSMRoadSegment> sourceNode = graph.getNodes().get(geospatialGraphDAO.getNearestIntersection(routeRequest.getSource()).getData().getOsmid());
-        Node<OSMIntersection, OSMRoadSegment> targetNode = graph.getNodes().get(geospatialGraphDAO.getNearestIntersection(routeRequest.getDestination()).getData().getOsmid());
-        var intermediates = routeRequest.getIntermediates()
-                .stream().map(it -> (Node<OSMIntersection, OSMRoadSegment>) graph.getNodes().get(geospatialGraphDAO.getNearestIntersection(it).getData().getOsmid())).toList();
+        Map<Node<OSMIntersection, OSMRoadSegment>, Address> addressToNodes = new HashMap<>();
+        Node<OSMIntersection, OSMRoadSegment> sourceNode = graph.getNodes().get(
+                geospatialGraphDAO.getNearestIntersection(routeRequest.getSource().getId())
+                        .getData().getOsmid()
+        );
+        addressToNodes.put(sourceNode, routeRequest.getSource());
+        Node<OSMIntersection, OSMRoadSegment> destinationNode = graph.getNodes().get(
+                geospatialGraphDAO.getNearestIntersection(routeRequest.getDestination().getId())
+                        .getData().getOsmid()
+        );
+        addressToNodes.put(destinationNode, routeRequest.getDestination());
 
-        var dijkstra = new MultipointDijkstra();
-        MultipointRoute<OSMIntersection, OSMRoadSegment> multipointRoute = dijkstra.run(graph, sourceNode, intermediates, targetNode);
+        List<Node<OSMIntersection, OSMRoadSegment>> intermediates = new ArrayList<>();
+        routeRequest.getIntermediates().forEach(it -> {
+            var node = graph.getNodes().get(geospatialGraphDAO.getNearestIntersection(it.getId())
+                            .getData()
+                            .getOsmid()
+            );
+            addressToNodes.put(
+                    node,
+                    it
+            );
+            intermediates.add(node);
+        });
+
+        var dijkstra = new MultipointDijkstra(addressToNodes);
+        MultipointRoute<OSMIntersection, OSMRoadSegment> multipointRoute = dijkstra.run(graph, sourceNode, intermediates, destinationNode);
 
         log.info("Operação concluída em {} ms", System.currentTimeMillis() - millis);
         MultipointRouteDTO<OSMIntersection, OSMRoadSegment> dto = MultipointRouteDTO.toDTO(multipointRoute);
