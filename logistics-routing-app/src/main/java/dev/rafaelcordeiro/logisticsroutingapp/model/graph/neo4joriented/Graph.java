@@ -9,6 +9,7 @@ import java.util.Map;
 
 @Getter
 @Setter
+@SuppressWarnings("rawtypes")
 public class Graph implements IGraph {
     private Map<Long, Node> nodes;
 
