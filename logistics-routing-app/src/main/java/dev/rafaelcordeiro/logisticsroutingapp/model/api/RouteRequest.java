@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class RouteRequest {
-    private String source;
-    private List<String> intermediates;
-    private String destination;
+    private Address source;
+    private List<Address> intermediates;
+    private Address destination;
 }
