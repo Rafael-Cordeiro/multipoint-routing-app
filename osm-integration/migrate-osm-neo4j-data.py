@@ -1,5 +1,8 @@
 import osmnx as ox
 import neo4j
+import shapely
+import json
+import time
 
 NEO4J_URI = "neo4j://localhost:7999"
 NEO4J_USER = "neo4j"
@@ -39,7 +42,8 @@ rels_query = '''
             r.name      = road.name,
             r.highway   = road.highway,
             r.max_speed = road.max_speed,
-            r.length    = toFloat(road.length)
+            r.length    = toFloat(road.length),
+            r.geometry  = [p IN road.geometry | point({latitude:p.y, longitude:p.x})]
     RETURN COUNT(*) AS total
 '''
 
@@ -68,6 +72,21 @@ def insert_data(tx, query, rows, batch_size=10000):
             total += results[0]['TOTAL']
         batch += 1
 
+def point_to_neo4j_point(point):
+    geojson = json.loads(shapely.to_geojson(point))
+    geojson['x'] = geojson['coordinates'][0]
+    geojson['y'] = geojson['coordinates'][1]
+    if type(geojson['x']) != int and type(geojson['x']) != float and type(geojson['x']) != complex:
+        return None
+    if type(geojson['y']) != int and type(geojson['y']) != float and type(geojson['y']) != complex:
+        return None
+    del geojson['coordinates']
+    del geojson['type']
+    return geojson
+
+def linestring_to_neo4j_point_array(geometry):
+    a = list(filter(lambda row : row != None, map(lambda coords: point_to_neo4j_point(shapely.Point(coords)), geometry.coords)))
+    return a
 
 def run_migrate():
     # Import GeoDataFrame from OSM
@@ -78,15 +97,23 @@ def run_migrate():
     gdf_relationships.reset_index(inplace=True)
     print('[INFO] Importing concluded')
 
+    print('[INFO] Modifying relationships GDF: transforming geometry column from Linestring to GeoJSON Point array')
+    gdf_relationships['geometry'] = gdf_relationships['geometry'].apply(linestring_to_neo4j_point_array)
+    print('[INFO] Modifying relationships GDF: Geometry transformation concluded')
+
     # Persist on neo4j
     with driver.session() as session:
         session.execute_write(create_constraints)
         print('[INFO] Creating nodes')
         session.execute_write(insert_data, node_query, gdf_nodes.drop(columns=['geometry']))
         print('[INFO] Creating relationships')
-        session.execute_write(insert_data, rels_query, gdf_relationships.drop(columns=['geometry']))
+        session.execute_write(insert_data, rels_query, gdf_relationships)
         print('[INFO] Graph persisted')
 
 
 if __name__ == "__main__":
+    start = time.time()
     run_migrate()
+    end = time.time()
+    millis = (end - start) * 1000
+    print(f"Tempo de execução: {millis:.2f} ms")
