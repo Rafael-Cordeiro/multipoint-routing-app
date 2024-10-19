@@ -112,7 +112,8 @@ public class GeospatialGraphDAO {
                     Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("length"), Double.class),
                     Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("highway"), String.class),
                     Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("oneway"), Boolean.class),
-                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("ref"), String.class)
+                    Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("ref"), String.class),
+                    Neo4jUtils.extractGeometry(record.get(1).get("geometry"))
             );
             var relationship = new Relationship<>(segmentData, startNode.get(), endNode.get());
             startNode.get().addAdjacentNode(endNode.get(), relationship);
