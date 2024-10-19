@@ -7,6 +7,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public abstract class OpenStreetMapTag extends Neo4jTag {
+public abstract class OpenStreetMapTag implements Neo4jTag {
     private Long osmid;
 }

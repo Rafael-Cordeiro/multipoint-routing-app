@@ -1,4 +1,4 @@
 package dev.rafaelcordeiro.logisticsroutingapp.model.tags;
 
-public abstract class Neo4jTag {
+public interface Neo4jTag {
 }
