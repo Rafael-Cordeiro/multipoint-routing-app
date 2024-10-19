@@ -115,7 +115,7 @@ public class GeospatialGraphDAO {
                     Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(1).get("ref"), String.class)
             );
             var relationship = new Relationship<>(segmentData, startNode.get(), endNode.get());
-            startNode.get().addAdjascentNode(endNode.get(), relationship);
+            startNode.get().addAdjacentNode(endNode.get(), relationship);
         });
         log.info("Grafo montado em {} ms", System.currentTimeMillis() - millis);
         return graph;

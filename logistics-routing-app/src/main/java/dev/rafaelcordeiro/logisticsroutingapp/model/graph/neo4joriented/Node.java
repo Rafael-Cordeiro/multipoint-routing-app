@@ -5,24 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 @Getter
 @Setter
 public class Node<N extends Neo4jTag, R extends Neo4jTag> {
     private N data;
-    private Map<Node<N, R>, Relationship<R>> adjascentNodes;
+    private Map<Node<N, R>, Relationship<R>> adjacentNodes;
 
     public Node() {
-        adjascentNodes = new HashMap<>();
+        adjacentNodes = new HashMap<>();
     }
 
-    public void addAdjascentNode(Node<N, R> adjascentNode, Relationship<R> relationship) {
-        if (this.adjascentNodes == null) {
-            this.adjascentNodes = new HashMap<>();
+    public void addAdjacentNode(Node<N, R> adjascentNode, Relationship<R> relationship) {
+        if (this.adjacentNodes == null) {
+            this.adjacentNodes = new HashMap<>();
         }
-        adjascentNodes.put(adjascentNode, relationship);
+        adjacentNodes.put(adjascentNode, relationship);
     }
 }

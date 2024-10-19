@@ -110,7 +110,7 @@ public class MultipointDijkstra {
         while (!unsettledNodes.isEmpty() && !unvisitedNodes.isEmpty()) {
             Node<OSMIntersection, OSMRoadSegment> currentNode = getLowestDistanceNode(unsettledNodes);
             unsettledNodes.remove(currentNode);
-            for (Map.Entry<Node<OSMIntersection, OSMRoadSegment>, Relationship<OSMRoadSegment>> adjacencyPair : currentNode.getAdjascentNodes().entrySet()) {
+            for (Map.Entry<Node<OSMIntersection, OSMRoadSegment>, Relationship<OSMRoadSegment>> adjacencyPair : currentNode.getAdjacentNodes().entrySet()) {
                 Node<OSMIntersection, OSMRoadSegment> adjacentNode = adjacencyPair.getKey();
                 Double edgeWeight = adjacencyPair.getValue().getData().getLength();
                 if (!settledNodes.contains(adjacentNode)) {
