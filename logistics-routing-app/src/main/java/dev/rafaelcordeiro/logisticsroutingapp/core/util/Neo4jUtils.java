@@ -3,6 +3,8 @@ package dev.rafaelcordeiro.logisticsroutingapp.core.util;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.types.Point;
 
+import java.util.List;
+
 public class Neo4jUtils {
     public static <T> T ensureNullSafetyRecordValueExtraction(Value value, Class<T> tClass) {
         try {
@@ -31,5 +33,9 @@ public class Neo4jUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static List<Point> extractGeometry(Value value) {
+        return value.asList().stream().map(it -> (Point) it).toList();
     }
 }
