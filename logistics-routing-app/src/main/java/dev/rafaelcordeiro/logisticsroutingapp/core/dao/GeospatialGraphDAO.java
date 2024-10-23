@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.neo4j.driver.QueryConfig;
 import org.neo4j.driver.types.Point;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GeospatialGraphDAO {
     private String nodesAndRelationsRecordsQuery = "MATCH (n1)-[r]->(n2) RETURN n1, r, n2";
     private String intersectionsAndSegmentsQuery = "MATCH (n1:INTERSECTION)-[r:ROAD_SEGMENT]->(n2:INTERSECTION) RETURN n1, r, n2";
+    private String nearestIntersectionQuery = "MATCH (address:ADDRESS {id: $id})-[:NEAREST_INTERSECTION]->(target:INTERSECTION) RETURN target LIMIT 1";
 //    private String nearestIntersectionQuery      = "MATCH (address)-[:NEAREST_INTERSECTION]->(target:INTERSECTION)\nWHERE address.id = $code\nRETURN target";
 
     public BasicGraph fetchBasicGraph() {
@@ -126,7 +128,8 @@ public class GeospatialGraphDAO {
         log.info("Buscando intersecção mais próxima do endereço com ID {}", id);
         Long millis = System.currentTimeMillis();
         var result = BasicNeo4jConnection.getDriver()
-                .executableQuery("MATCH (address:ADDRESS {id: \"" + id + "\"})-[:NEAREST_INTERSECTION]->(target:INTERSECTION)\nRETURN target LIMIT 1")
+                .executableQuery(nearestIntersectionQuery)
+                .withParameters(Map.of("id", id))
                 .withConfig(QueryConfig.builder().withDatabase("neo4j").build())
                 .execute();
 
