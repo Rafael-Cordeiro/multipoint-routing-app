@@ -118,10 +118,9 @@ defineOptions({
 
       var startMarker = L.marker(
         L.latLng(
-          multipointRoute.source.right.location.y,
-          multipointRoute.source.right.location.x
-        )
-      ).addTo(this.map)
+          multipointRoute.source.left.location.y,
+          multipointRoute.source.left.location.x
+        )).bindPopup(multipointRoute.source.left.name).addTo(this.map)
 
       this.path.route.push({
         address: multipointRoute.source.left,
@@ -129,33 +128,23 @@ defineOptions({
         marker: startMarker,
         polyline: [],
       })
-      console.log(multipointRoute.paths)
+
       multipointRoute.paths.forEach((path) => {
         let routeItem = {}
-        if (path.first.osmid == multipointRoute.destination.osmid) {
-          routeItem.marker = L.marker(
-            L.latLng(path.first.location.y, path.first.location.x)
-          ).addTo(this.map);
-        } else {
-          routeItem.marker = L.marker(L.latLng(path.first.location.y, path.first.location.x)).addTo(
-            this.map
-          );
-        }
+        routeItem.marker = L.marker(L.latLng(path.second.location.y, path.second.location.x))
+        .bindPopup(path.second.name).addTo(this.map);
+
         routeItem.color = this.getRandomColor()
         routeItem.polyline = L.polyline(path.third.map((item) => [item.y, item.x]))
-          .setStyle({ color: routeItem.color, weight: 7 })
+          .setStyle({ color: routeItem.color, weight: 7, className: 'bordered-polyline' })
           .addTo(this.map);
+
         routeItem.address = path.second
         this.path.route.push(routeItem)
       });
 
-      console.log(this.path.route)
-
       // this.map.panInsideBounds(L.latLngBounds(marker1, marker2));
-      console.log(
-        `Consulta de rota e montagem de mapa executou em ${Date.now() - millis
-        } ms`
-      );
+      console.log(`Consulta de rota e montagem de mapa executou em ${Date.now() - millis} ms`);
       console.log(this.path.route)
     },
     clearData() {
@@ -231,5 +220,10 @@ body {
 
 body {
   font: 16px Ubuntu;
+}
+
+.bordered-polyline {
+  filter: drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000)
+    drop-shadow(-1px 1px 0 #000);
 }
 </style>
