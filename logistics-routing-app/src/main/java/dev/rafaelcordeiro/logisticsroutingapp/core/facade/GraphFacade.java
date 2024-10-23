@@ -64,12 +64,16 @@ public class GraphFacade {
         var millis = System.currentTimeMillis();
 
         final var graph = geospatialGraphDAO.getFullGeoGraph();
+
         Map<Node<OSMIntersection, OSMRoadSegment>, Address> addressToNodes = new HashMap<>();
+        routeRequest.setSource(geospatialGraphDAO.getAddressById(routeRequest.getSource().getId()));
         Node<OSMIntersection, OSMRoadSegment> sourceNode = graph.getNodes().get(
                 geospatialGraphDAO.getNearestIntersection(routeRequest.getSource().getId())
                         .getData().getOsmid()
         );
         addressToNodes.put(sourceNode, routeRequest.getSource());
+
+        routeRequest.setDestination(geospatialGraphDAO.getAddressById(routeRequest.getDestination().getId()));
         Node<OSMIntersection, OSMRoadSegment> destinationNode = graph.getNodes().get(
                 geospatialGraphDAO.getNearestIntersection(routeRequest.getDestination().getId())
                         .getData().getOsmid()
@@ -78,14 +82,12 @@ public class GraphFacade {
 
         List<Node<OSMIntersection, OSMRoadSegment>> intermediates = new ArrayList<>();
         routeRequest.getIntermediates().forEach(it -> {
+            it = geospatialGraphDAO.getAddressById(it.getId());
             var node = graph.getNodes().get(geospatialGraphDAO.getNearestIntersection(it.getId())
                             .getData()
                             .getOsmid()
             );
-            addressToNodes.put(
-                    node,
-                    it
-            );
+            addressToNodes.put(node, it);
             intermediates.add(node);
         });
 
