@@ -7,6 +7,7 @@ import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphN
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Graph;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Relationship;
+import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GeospatialGraphDAO {
     private String nodesAndRelationsRecordsQuery = "MATCH (n1)-[r]->(n2) RETURN n1, r, n2";
     private String intersectionsAndSegmentsQuery = "MATCH (n1:INTERSECTION)-[r:ROAD_SEGMENT]->(n2:INTERSECTION) RETURN n1, r, n2";
+    private String addressByIdQuery = "MATCH (a:ADDRESS {id: $id}) RETURN a;";
     private String nearestIntersectionQuery = "MATCH (address:ADDRESS {id: $id})-[:NEAREST_INTERSECTION]->(target:INTERSECTION) RETURN target LIMIT 1";
 //    private String nearestIntersectionQuery      = "MATCH (address)-[:NEAREST_INTERSECTION]->(target:INTERSECTION)\nWHERE address.id = $code\nRETURN target";
 
@@ -145,8 +147,28 @@ public class GeospatialGraphDAO {
             ));
             target.set(node);
         });
-        log.info("Intersecção buscada em {} ms", System.currentTimeMillis() - millis);
+        log.info("Intersecção retornada em {} ms", System.currentTimeMillis() - millis);
         return target.get();
+    }
+    
+    public Address getAddressById(String id) {
+        log.info("Buscando dados do endereço de ID {}", id);
+        Long millis = System.currentTimeMillis();
+        var result = BasicNeo4jConnection.getDriver()
+                .executableQuery(addressByIdQuery)
+                .withParameters(Map.of("id", id))
+                .withConfig(QueryConfig.builder().withDatabase("neo4j").build())
+                .execute();
+
+        var record = result.records().getFirst();
+        Address address = new Address(
+                Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("id"), String.class),
+                Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("full_address"), String.class),
+                Neo4jUtils.ensureNullSafetyRecordValueExtraction(record.get(0).get("location"), Point.class)
+        );
+
+        log.info("Dados de endereço consultado em {} ms", System.currentTimeMillis() - millis);
+        return address;
     }
 
 }
