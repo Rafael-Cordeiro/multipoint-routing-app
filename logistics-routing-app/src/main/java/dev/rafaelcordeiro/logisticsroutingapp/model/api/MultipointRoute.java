@@ -2,11 +2,11 @@ package dev.rafaelcordeiro.logisticsroutingapp.model.api;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.util.Pair;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
+import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Neo4jTag;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;

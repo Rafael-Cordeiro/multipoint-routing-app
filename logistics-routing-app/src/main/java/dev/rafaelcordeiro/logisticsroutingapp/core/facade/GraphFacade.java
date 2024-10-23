@@ -5,7 +5,7 @@ import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.LegacyDijk
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.MultipointDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.SimpleDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.dao.GeospatialGraphDAO;
-import dev.rafaelcordeiro.logisticsroutingapp.model.api.Address;
+import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.MultipointRoute;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.RouteRequest;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
