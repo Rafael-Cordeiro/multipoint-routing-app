@@ -34,7 +34,7 @@ export default {
     );
   },
   watch: {
-    address(newValue) {
+    address() {
       this.internalAddress = this.address
     },
   },
