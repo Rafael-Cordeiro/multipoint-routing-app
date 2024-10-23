@@ -35,7 +35,7 @@ public class RoutingController {
     }
 
     @PostMapping
-    public @ResponseBody ResponseEntity<MultipointRouteDTO<OSMIntersection, OSMRoadSegment>> calculateMultiPointRoute(@RequestBody RouteRequest routeRequest) {
+    public @ResponseBody ResponseEntity<MultipointRouteDTO> calculateMultiPointRoute(@RequestBody RouteRequest routeRequest) {
         var response = graphFacade.calculateMultipointRoute(routeRequest);
         return ResponseEntity.ok(response);
     }

@@ -58,7 +58,7 @@ public class GraphFacade {
         return shortestPath;
     }
 
-    public MultipointRouteDTO<OSMIntersection, OSMRoadSegment> calculateMultipointRoute(RouteRequest routeRequest) {
+    public MultipointRouteDTO calculateMultipointRoute(RouteRequest routeRequest) {
         log.info("\n\n\n========================================================================\n\n\n");
         log.info("Gerando rota multiponto");
         var millis = System.currentTimeMillis();
@@ -93,7 +93,6 @@ public class GraphFacade {
         MultipointRoute<OSMIntersection, OSMRoadSegment> multipointRoute = dijkstra.run(graph, sourceNode, intermediates, destinationNode);
 
         log.info("Operação concluída em {} ms", System.currentTimeMillis() - millis);
-        MultipointRouteDTO<OSMIntersection, OSMRoadSegment> dto = MultipointRouteDTO.toDTO(multipointRoute);
         return MultipointRouteDTO.toDTO(multipointRoute);
     }
 

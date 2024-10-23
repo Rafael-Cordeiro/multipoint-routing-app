@@ -4,7 +4,6 @@ import dev.rafaelcordeiro.logisticsroutingapp.core.util.Pair;
 import dev.rafaelcordeiro.logisticsroutingapp.core.util.Triple;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.MultipointRoute;
-import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Neo4jTag;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import lombok.Getter;
@@ -16,13 +15,13 @@ import java.util.List;
 
 @Getter
 @Setter
-public class MultipointRouteDTO<N extends Neo4jTag, R extends Neo4jTag> {
-    private Pair<Address, N> source;
-    private Pair<Address, N> destination;
-    private List<Triple<N, Address, ArrayList<Point>>> paths = new ArrayList<>();
+public class MultipointRouteDTO {
+    private Pair<Address, OSMIntersection> source;
+    private Pair<Address, OSMIntersection> destination;
+    private List<Triple<OSMIntersection, Address, ArrayList<Point>>> paths = new ArrayList<>();
 
-    public static MultipointRouteDTO<OSMIntersection, OSMRoadSegment> toDTO(MultipointRoute<OSMIntersection, OSMRoadSegment> object) {
-        MultipointRouteDTO<OSMIntersection, OSMRoadSegment> dto = new MultipointRouteDTO<>();
+    public static MultipointRouteDTO toDTO(MultipointRoute<OSMIntersection, OSMRoadSegment> object) {
+        MultipointRouteDTO dto = new MultipointRouteDTO();
         dto.setSource(Pair.of(object.getSource().getLeft(), object.getSource().getRight().getData()));
         dto.setDestination(Pair.of(object.getDestination().getLeft(), object.getDestination().getRight().getData()));
 
