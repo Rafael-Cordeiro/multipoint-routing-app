@@ -34,10 +34,18 @@ public class MultipointDijkstra {
             Node<OSMIntersection, OSMRoadSegment> source,
             List<Node<OSMIntersection, OSMRoadSegment>> intermediates,
             Node<OSMIntersection, OSMRoadSegment> destination) {
-        log.info("Executando Dijkstra de dois pontos com os nós de OSMID {} e {}", source.getData().getOsmid(), destination.getData().getOsmid());
+
+        if (intermediates.isEmpty())
+            log.info("Executando Dijkstra de dois pontos com os nós de OSMID {} e {}", source.getData().getOsmid(), destination.getData().getOsmid());
+        else {
+            log.info("Executando Dijkstra multiponto. OSMID dos nós segue sendo:\nOrigem: {}\nintermediários:\n{}\ne destino: {}",
+                source.getData().getOsmid().toString(),
+                intermediates.stream().map(it -> it.getData().getOsmid().toString()).reduce((prev, next) -> prev + "\n" + next).get(),
+                destination.getData().getOsmid().toString()
+            );
+        }
         Long start = System.currentTimeMillis();
 
-//        TODO: Ajustar ordem de preenchimento de caminhos
         var multipointRoute = new MultipointRoute<OSMIntersection, OSMRoadSegment>();
         multipointRoute.setSource(Pair.of(addressToNodes.get(source), source));
         multipointRoute.setDestination(Pair.of(addressToNodes.get(destination), destination));
@@ -84,8 +92,7 @@ public class MultipointDijkstra {
             iterateThroughNodes(multipointRoute, graph, nextNode, nextIntermediates, destination);
         } else {
             dijkstraDataMap.get(destination).getShortestPath().add(destination);
-            multipointRoute.getPaths().put(
-                    destination,
+            multipointRoute.getPaths().put(destination,
                     Pair.of(addressToNodes.get(destination), dijkstraDataMap.get(destination).getShortestPath()));
         }
     }
