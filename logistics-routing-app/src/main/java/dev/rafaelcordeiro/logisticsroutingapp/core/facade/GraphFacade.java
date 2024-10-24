@@ -99,6 +99,7 @@ public class GraphFacade {
         multipointRoute.getSource().setLeft(routeRequest.getSource());
         multipointRoute.getDestination().setLeft(routeRequest.getDestination());
         log.info("Operação concluída em {} ms", System.currentTimeMillis() - millis);
+        System.gc();
         return MultipointRouteDTO.toDTO(multipointRoute);
     }
 

@@ -37,7 +37,6 @@ public class RoutingController {
     @PostMapping
     public @ResponseBody ResponseEntity<MultipointRouteDTO> calculateMultiPointRoute(@RequestBody RouteRequest routeRequest) {
         var response = graphFacade.calculateMultipointRoute(routeRequest);
-        System.gc();
         return ResponseEntity.ok(response);
     }
 }
