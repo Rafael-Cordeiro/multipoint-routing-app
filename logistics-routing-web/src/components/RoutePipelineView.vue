@@ -1,6 +1,7 @@
 <template>
-  <div :class="[index > 0 && index+1 < route.length ? 'q-ml-md' : '', 'q-my-md']" v-for="(section, index) in route" v-bind:key="index">
-    <q-avatar :size="'xs'" :style="styles[index].style" /> {{ section.address.name }}
+  <div :class="[index > 0 && index+1 < route.length ? 'q-ml-md' : '', 'q-my-md', 'row']" v-for="(section, index) in route" v-bind:key="index">
+    <q-avatar class="q-mr-sm" :size="'xs'" :style="styles[index].style" />
+    {{ section.address.name }}
   </div>
 </template>
 <script>
