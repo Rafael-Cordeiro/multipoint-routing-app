@@ -1,8 +1,8 @@
 <template>
   <q-page class="q-pl-xl q-pr-xl">
     <q-form class="row justify-evenly items-center" @submit.prevent="handleSubmit">
-      <div v-if="path.route.length > 0" class="col-6">
-        <span class="text-h4">Rota multiponto ordenada</span>
+      <div v-if="path.route.length > 0" class="col-4">
+        <span class="text-h5">Rota multiponto ordenada</span>
         <RoutePipelineView :route="path.route.map(it => {
           return {
             address: it.address,
@@ -11,7 +11,7 @@
         })" />
       </div>
       <div class="col-4">
-        <span class="text-h4">Insira os endereços</span>
+        <span class="text-h5">Insira os endereços</span>
         <SelectAddress :address="addresses.source" :options="addresses.options" />
         <div v-for="(intermediate, index) in addresses.intermediates" :key="index" class="q-ml-xl">
           <SelectAddress :address="intermediate" :options="addresses.options" />
@@ -22,14 +22,14 @@
         </div>
         <SelectAddress :address="addresses.destination" :options="addresses.options" />
       </div>
-      <div class="col-1">
+      <div class="col-2 q-px-md">
         <div class="column">
-          <q-btn color="primary" type="submit" label="Route" icon="directions" :loading="submitting">
+          <q-btn color="primary" type="submit" label="Calcular rota" icon="directions" :loading="submitting">
             <template v-slot:loading>
               <q-spinner-facebook />
             </template>
           </q-btn>
-          <q-btn @click="clearData" icon="clear" label="Clear" />
+          <q-btn @click="clearData" icon="clear" label="Limpar formulário e mapa" />
         </div>
       </div>
     </q-form>
