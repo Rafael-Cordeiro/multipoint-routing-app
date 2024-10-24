@@ -99,6 +99,9 @@ public class GraphFacade {
         multipointRoute.getSource().setLeft(routeRequest.getSource());
         multipointRoute.getDestination().setLeft(routeRequest.getDestination());
         log.info("Operação concluída em {} ms", System.currentTimeMillis() - millis);
+
+//      Invoca Garbage Collector para limpar objetos relacionados ao grafo após o retorno e reduzir o consumo de memória RAM
+        System.gc();
         return MultipointRouteDTO.toDTO(multipointRoute);
     }
 
