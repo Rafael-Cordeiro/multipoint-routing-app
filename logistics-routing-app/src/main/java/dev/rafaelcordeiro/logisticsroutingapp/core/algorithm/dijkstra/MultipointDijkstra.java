@@ -1,10 +1,11 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra;
 
-import dev.rafaelcordeiro.logisticsroutingapp.core.util.Pair;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Graph;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Relationship;
 import dev.rafaelcordeiro.logisticsroutingapp.model.route.MultipointRoute;
+import dev.rafaelcordeiro.logisticsroutingapp.model.route.RoutePath;
+import dev.rafaelcordeiro.logisticsroutingapp.model.route.RoutePoint;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
@@ -29,7 +30,7 @@ public class MultipointDijkstra {
         this.addressToNodes = addressToNodes;
     }
 
-    public MultipointRoute<OSMIntersection, OSMRoadSegment> run(
+    public MultipointRoute run(
             Graph graph,
             Node<OSMIntersection, OSMRoadSegment> source,
             List<Node<OSMIntersection, OSMRoadSegment>> intermediates,
@@ -46,9 +47,9 @@ public class MultipointDijkstra {
         }
         Long start = System.currentTimeMillis();
 
-        var multipointRoute = new MultipointRoute<OSMIntersection, OSMRoadSegment>();
-        multipointRoute.setSource(Pair.of(addressToNodes.get(source), source));
-        multipointRoute.setDestination(Pair.of(addressToNodes.get(destination), destination));
+        var multipointRoute = new MultipointRoute();
+        multipointRoute.setSource(new RoutePoint(source, addressToNodes.get(source)));
+        multipointRoute.setDestination(new RoutePoint(destination, addressToNodes.get(destination)));
         iterateThroughNodes(multipointRoute, graph, source, intermediates, destination);
 
         log.info("Algoritmo executou em: {} ms", System.currentTimeMillis() - start);
@@ -64,8 +65,8 @@ public class MultipointDijkstra {
      * @param intermediates
      * @param destination
      */
-    private void iterateThroughNodes(MultipointRoute<OSMIntersection, OSMRoadSegment> multipointRoute,
-                                     Graph graph, Node<OSMIntersection, OSMRoadSegment> source,
+    private void iterateThroughNodes(MultipointRoute multipointRoute, Graph graph,
+                                     Node<OSMIntersection, OSMRoadSegment> source,
                                      List<Node<OSMIntersection, OSMRoadSegment>> intermediates,
                                      Node<OSMIntersection, OSMRoadSegment> destination) {
         // reinicia mpeamento de nós x dados de dijkstra a cada iteração
@@ -88,12 +89,12 @@ public class MultipointDijkstra {
             nextIntermediates.remove(nextNode);
 
             dijkstraDataMap.get(nextNode).getShortestPath().add(nextNode);
-            multipointRoute.getPaths().put(nextNode, Pair.of(addressToNodes.get(nextNode), data.getShortestPath()));
+            multipointRoute.getPaths().add(new RoutePath(new RoutePoint(nextNode, addressToNodes.get(nextNode)), data.getShortestPath()));
             iterateThroughNodes(multipointRoute, graph, nextNode, nextIntermediates, destination);
         } else {
             dijkstraDataMap.get(destination).getShortestPath().add(destination);
-            multipointRoute.getPaths().put(destination,
-                    Pair.of(addressToNodes.get(destination), dijkstraDataMap.get(destination).getShortestPath()));
+            multipointRoute.getPaths().add(new RoutePath(new RoutePoint(destination,
+                    addressToNodes.get(destination)), dijkstraDataMap.get(destination).getShortestPath()));
         }
     }
 

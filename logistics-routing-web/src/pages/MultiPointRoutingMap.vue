@@ -43,6 +43,9 @@ import L from "leaflet";
 import axios from "axios";
 import SelectAddress from "src/components/SelectAddress.vue";
 import RoutePipelineView from 'src/components/RoutePipelineView.vue'
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
 
 defineOptions({
   name: "MultiPointRoutingMap",
@@ -76,6 +79,7 @@ defineOptions({
         },
         intermediates: [],
       },
+      loadingNotify: {},
     };
   },
   mounted() {
@@ -108,44 +112,46 @@ defineOptions({
       this.submitting = false;
     },
     async fetchRoute(body) {
-      const millis = Date.now();
-      const response = await axios
+      const start = Date.now();
+      this.displayLoadingNotify();
+      await axios
         .post("http://localhost:8080/routing", body)
+        .then((response) => response.data.entity)
+        .then((multipointRoute) => {
+          var startMarker = L.marker(
+            L.latLng(
+              multipointRoute.source.address.location.y,
+              multipointRoute.source.address.location.x
+            )).bindPopup(multipointRoute.source.address.name).addTo(this.map).openPopup()
+
+          this.path.route.push({
+            address: multipointRoute.source.address,
+            color: '#000000',
+            marker: startMarker,
+            polyline: [],
+          })
+
+          multipointRoute.paths.forEach((path) => {
+            let routeItem = {}
+            routeItem.marker = L.marker(L.latLng(path.point.address.location.y, path.point.address.location.x))
+              .bindPopup(path.point.address.name).addTo(this.map).openPopup();
+
+            routeItem.color = this.getRandomColor()
+            routeItem.polyline = L.polyline(path.line.map((item) => [item.y, item.x]))
+              .setStyle({ color: routeItem.color, weight: 7, className: 'bordered-polyline' })
+              .addTo(this.map);
+
+            routeItem.address = path.point.address
+            this.path.route.push(routeItem)
+          });
+
+          // this.map.panInsideBounds(L.latLngBounds(marker1, marker2));
+          var end = Date.now()
+          this.closeLoadingNotifyThenDisplayDoneNotify(end - start)
+          console.log(`Consulta de rota e montagem de mapa executou em ${end - start} ms`);
+
+        })
         .catch((error) => console.error(`[Error from axios]: ${error}`));
-      const multipointRoute = response.data;
-
-      console.log(multipointRoute);
-
-      var startMarker = L.marker(
-        L.latLng(
-          multipointRoute.source.left.location.y,
-          multipointRoute.source.left.location.x
-        )).bindPopup(multipointRoute.source.left.name).addTo(this.map)
-
-      this.path.route.push({
-        address: multipointRoute.source.left,
-        color: '#000000',
-        marker: startMarker,
-        polyline: [],
-      })
-
-      multipointRoute.paths.forEach((path) => {
-        let routeItem = {}
-        routeItem.marker = L.marker(L.latLng(path.second.location.y, path.second.location.x))
-        .bindPopup(path.second.name).addTo(this.map);
-
-        routeItem.color = this.getRandomColor()
-        routeItem.polyline = L.polyline(path.third.map((item) => [item.y, item.x]))
-          .setStyle({ color: routeItem.color, weight: 7, className: 'bordered-polyline' })
-          .addTo(this.map);
-
-        routeItem.address = path.second
-        this.path.route.push(routeItem)
-      });
-
-      // this.map.panInsideBounds(L.latLngBounds(marker1, marker2));
-      console.log(`Consulta de rota e montagem de mapa executou em ${Date.now() - millis} ms`);
-      console.log(this.path.route)
     },
     clearData() {
       this.addresses = {
@@ -195,6 +201,23 @@ defineOptions({
       }
       return color;
     },
+    displayLoadingNotify() {
+      this.loadingNotify = this.$q.notify({
+        group: false,
+        timeout: 0,
+        spinner: true,
+        message: 'Calculando rota',
+      })
+    },
+    closeLoadingNotifyThenDisplayDoneNotify(millis) {
+      this.loadingNotify({
+        group: false,
+        timeout: 2500,
+        spinner: false,
+        message: 'Rota calculada com sucesso',
+        caption: `Tempo de execução: ${millis} ms`,
+      })
+    }
   },
 });
 </script>
@@ -223,7 +246,6 @@ body {
 }
 
 .bordered-polyline {
-  filter: drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000)
-    drop-shadow(-1px 1px 0 #000);
+  filter: drop-shadow(1px 1px 0 #000) drop-shadow(-1px -1px 0 #000) drop-shadow(1px -1px 0 #000) drop-shadow(-1px 1px 0 #000);
 }
 </style>

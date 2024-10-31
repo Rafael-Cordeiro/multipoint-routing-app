@@ -1,5 +1,7 @@
 package dev.rafaelcordeiro.logisticsroutingapp.controller;
 
+import dev.rafaelcordeiro.logisticsroutingapp.model.api.APIResponse;
+import dev.rafaelcordeiro.logisticsroutingapp.model.api.dto.MultipointRouteDTO;
 import dev.rafaelcordeiro.logisticsroutingapp.core.facade.GraphFacade;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.RouteRequest;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.dto.MultipointRouteDTO;
@@ -33,8 +35,11 @@ public class RoutingController {
     }
 
     @PostMapping
-    public @ResponseBody ResponseEntity<MultipointRouteDTO> calculateMultiPointRoute(@RequestBody RouteRequest routeRequest) {
-        var response = graphFacade.calculateMultipointRoute(routeRequest);
+    public @ResponseBody ResponseEntity<APIResponse<MultipointRouteDTO>> calculateMultiPointRoute(@RequestBody RouteRequest routeRequest) {
+        var route = graphFacade.calculateMultipointRoute(routeRequest);
+        var response = new APIResponse<MultipointRouteDTO>();
+        response.setSuccess(true);
+        response.setEntity(route);
         return ResponseEntity.ok(response);
     }
 }

@@ -92,12 +92,12 @@ public class GraphFacade {
         });
 
         var dijkstra = new MultipointDijkstra(addressToNodes);
-        MultipointRoute<OSMIntersection, OSMRoadSegment> multipointRoute = dijkstra.run(graph, sourceNode, intermediates, destinationNode);
+        MultipointRoute multipointRoute = dijkstra.run(graph, sourceNode, intermediates, destinationNode);
 
 //      Garante o indexação dos endereços conrretos na origem e no destino em caso de ocorrência
 //      de bug de perda de endereços relacionados a mesma interseção
-        multipointRoute.getSource().setLeft(routeRequest.getSource());
-        multipointRoute.getDestination().setLeft(routeRequest.getDestination());
+        multipointRoute.getSource().setAddress(routeRequest.getSource());
+        multipointRoute.getDestination().setAddress(routeRequest.getDestination());
         log.info("Operação concluída em {} ms", System.currentTimeMillis() - millis);
 
 //      Invoca Garbage Collector para limpar objetos relacionados ao grafo após o retorno e reduzir o consumo de memória RAM
