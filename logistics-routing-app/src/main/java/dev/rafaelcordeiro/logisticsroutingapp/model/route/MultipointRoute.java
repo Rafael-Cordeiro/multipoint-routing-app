@@ -1,4 +1,4 @@
-package dev.rafaelcordeiro.logisticsroutingapp.model.api;
+package dev.rafaelcordeiro.logisticsroutingapp.model.route;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.util.Pair;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;

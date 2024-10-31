@@ -1,11 +1,11 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.util.Pair;
-import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
-import dev.rafaelcordeiro.logisticsroutingapp.model.api.MultipointRoute;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Graph;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Relationship;
+import dev.rafaelcordeiro.logisticsroutingapp.model.route.MultipointRoute;
+import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import lombok.extern.slf4j.Slf4j;

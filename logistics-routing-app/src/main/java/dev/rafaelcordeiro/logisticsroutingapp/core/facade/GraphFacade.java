@@ -1,16 +1,16 @@
 package dev.rafaelcordeiro.logisticsroutingapp.core.facade;
 
-import dev.rafaelcordeiro.logisticsroutingapp.core.dto.MultipointRouteDTO;
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.LegacyDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.MultipointDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.algorithm.dijkstra.SimpleDijkstra;
 import dev.rafaelcordeiro.logisticsroutingapp.core.dao.GeospatialGraphDAO;
-import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
-import dev.rafaelcordeiro.logisticsroutingapp.model.api.MultipointRoute;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.RouteRequest;
+import dev.rafaelcordeiro.logisticsroutingapp.model.api.dto.MultipointRouteDTO;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraph;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.basicgraph.BasicGraphNode;
 import dev.rafaelcordeiro.logisticsroutingapp.model.graph.neo4joriented.Node;
+import dev.rafaelcordeiro.logisticsroutingapp.model.route.MultipointRoute;
+import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import lombok.extern.slf4j.Slf4j;

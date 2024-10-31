@@ -1,10 +1,8 @@
 package dev.rafaelcordeiro.logisticsroutingapp.controller;
 
-import dev.rafaelcordeiro.logisticsroutingapp.core.dto.MultipointRouteDTO;
 import dev.rafaelcordeiro.logisticsroutingapp.core.facade.GraphFacade;
 import dev.rafaelcordeiro.logisticsroutingapp.model.api.RouteRequest;
-import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
-import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
+import dev.rafaelcordeiro.logisticsroutingapp.model.api.dto.MultipointRouteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;

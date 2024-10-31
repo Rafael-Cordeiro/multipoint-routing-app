@@ -1,9 +1,9 @@
-package dev.rafaelcordeiro.logisticsroutingapp.core.dto;
+package dev.rafaelcordeiro.logisticsroutingapp.model.api.dto;
 
 import dev.rafaelcordeiro.logisticsroutingapp.core.util.Pair;
 import dev.rafaelcordeiro.logisticsroutingapp.core.util.Triple;
+import dev.rafaelcordeiro.logisticsroutingapp.model.route.MultipointRoute;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.Address;
-import dev.rafaelcordeiro.logisticsroutingapp.model.api.MultipointRoute;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMIntersection;
 import dev.rafaelcordeiro.logisticsroutingapp.model.tags.OSMRoadSegment;
 import lombok.Getter;
