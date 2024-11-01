@@ -25,11 +25,9 @@ import java.util.Map;
 @Service
 public class GraphFacade {
 
+    @Autowired
     private GeospatialGraphDAO geospatialGraphDAO;
 
-    public GraphFacade() {
-        geospatialGraphDAO = new GeospatialGraphDAO();
-    }
 
     public BasicGraph fetchBasicGraph() {
         return geospatialGraphDAO.fetchBasicGraph();
